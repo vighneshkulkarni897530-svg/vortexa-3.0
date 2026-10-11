@@ -12,6 +12,8 @@ from pydantic import BaseModel, Field
 from backend.detection.schemas import DecisionAction, ScanResponse
 from backend.llm.mock_provider import LLMGenerationConfig, MockLLMProvider
 from backend.llm.output_guard import OutputGuard, SecurityLeakageException
+from backend.llm.providers import get_default_llm_provider
+
 
 
 class LLMRequest(BaseModel):
@@ -52,8 +54,9 @@ class LLMAdapter:
         provider: Optional[Any] = None,
         output_guard: Optional[OutputGuard] = None,
     ):
-        self.provider = provider or MockLLMProvider()
+        self.provider = provider or get_default_llm_provider()
         self.output_guard = output_guard or OutputGuard()
+
 
     def generate_guarded(self, request: LLMRequest) -> LLMResponse:
         """Invokes LLM strictly after verifying security clearance."""

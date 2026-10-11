@@ -1,11 +1,14 @@
-"""Configuration management for PromptShield Detection Engine."""
-
 import os
 from typing import List, Set
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class Settings(BaseModel):
+
     """Runtime configuration settings."""
 
     # Service metadata
@@ -14,6 +17,13 @@ class Settings(BaseModel):
     POLICY_VERSION: str = "v1.2.0"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+
+    # External LLM Provider settings
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    ACTIVE_LLM_PROVIDER: str = os.getenv("ACTIVE_LLM_PROVIDER", "auto")
+
 
     # Content limits (Stage A validation)
     MAX_CONTENT_LENGTH: int = int(os.getenv("MAX_CONTENT_LENGTH", "1048576"))  # 1MB default
