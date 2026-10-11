@@ -5,9 +5,10 @@ secret patterns (API keys, tokens, private keys) without leaking matched
 values in findings, previews, logs, or error responses.
 """
 
+import codecs
 import math
 import re
-from typing import List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from backend.config import settings
 from backend.detection.schemas import (
@@ -60,6 +61,15 @@ SECRET_PATTERNS = [
     ),
 ]
 
+LEET_MAP: Dict[str, str] = {
+    "a": "[aA4@]",
+    "e": "[eE3]",
+    "i": "[iI1!|]",
+    "o": "[oO0]",
+    "s": "[sS5$]",
+    "t": "[tT7]",
+}
+
 
 def mask_secret(value: str) -> str:
     """Safely redact secret value so it is never leaked in logs or API responses."""
@@ -82,6 +92,23 @@ def calculate_entropy(s: str) -> float:
     return -sum(p * math.log2(p) for p in prob)
 
 
+def build_flexible_token_regex(token: str) -> re.Pattern:
+    """Build a regex matching a token despite spacing, case, delimiters, or simple leetspeak."""
+    parts = []
+    for c in token:
+        c_low = c.lower()
+        if c in {"_", "-", "."}:
+            parts.append(r"[\s_\-.]*")
+        elif c_low in LEET_MAP:
+            parts.append(LEET_MAP[c_low] + r"\s*")
+        elif c.isalnum():
+            parts.append(re.escape(c) + r"\s*")
+        else:
+            parts.append(re.escape(c) + r"\s*")
+    pat = "".join(parts).rstrip(r"\s*")
+    return re.compile(pat, re.IGNORECASE)
+
+
 class SecretScanner:
     """Scans content for canary secrets and sensitive credential patterns."""
 
@@ -92,23 +119,39 @@ class SecretScanner:
     ):
         self.canary_tokens: Set[str] = set(canary_tokens or settings.CANARY_TOKENS)
         self.configured_secrets: Set[str] = set(configured_secrets or settings.CONFIGURED_SENSITIVE_KEYS)
+        self._regex_cache: Dict[str, re.Pattern] = {}
 
-    def scan(self, text: str, source_ctx: SourceContext) -> List[DetectionFinding]:
-        """Scan text and return findings with safe redacted evidence."""
+    def _get_token_regex(self, token: str) -> re.Pattern:
+        if token not in self._regex_cache:
+            self._regex_cache[token] = build_flexible_token_regex(token)
+        return self._regex_cache[token]
+
+    def scan(
+        self,
+        text: str,
+        source_ctx: SourceContext,
+        auxiliary_channels: Optional[List[Tuple[str, str]]] = None,
+    ) -> List[DetectionFinding]:
+        """Scan text and auxiliary channels, returning findings with safe redacted evidence."""
         findings: List[DetectionFinding] = []
         if not text:
             return findings
 
-        # 1. Canary Token Exact & Substring Scan
+        # Track matched spans to avoid duplicate reporting on overlapping rules
+        reported_spans: Set[Tuple[int, int]] = set()
+
+        # 1. Canary Token Flexible Scan (Catches spacing, capitalization, leetspeak, delimiters)
         for canary in self.canary_tokens:
             if not canary:
                 continue
-            idx = 0
-            while True:
-                found_at = text.find(canary, idx)
-                if found_at == -1:
-                    break
-                end_pos = found_at + len(canary)
+            token_rgx = self._get_token_regex(canary)
+            for match in token_rgx.finditer(text):
+                found_at, end_pos = match.span()
+                span_key = (found_at, end_pos)
+                if span_key in reported_spans:
+                    continue
+                reported_spans.add(span_key)
+
                 findings.append(
                     DetectionFinding(
                         rule_id="SEC-CANARY-001",
@@ -125,18 +168,46 @@ class SecretScanner:
                         recommended_action=DecisionAction.BLOCK,
                     )
                 )
-                idx = end_pos
 
-        # 2. Configured Sensitive Secrets Scan
+            # ROT13 encoded canary scan
+            rot13_canary = codecs.encode(canary, "rot_13")
+            rot13_rgx = self._get_token_regex(rot13_canary)
+            for match in rot13_rgx.finditer(text):
+                found_at, end_pos = match.span()
+                span_key = (found_at, end_pos)
+                if span_key in reported_spans:
+                    continue
+                reported_spans.add(span_key)
+
+                findings.append(
+                    DetectionFinding(
+                        rule_id="SEC-CANARY-001-ROT13",
+                        category=RuleCategory.SECRET_EXFILTRATION,
+                        severity=Severity.CRITICAL,
+                        confidence=0.99,
+                        evidence_span=EvidenceSpan(
+                            start=found_at,
+                            end=end_pos,
+                            text_preview=mask_secret(canary),
+                        ),
+                        safe_evidence_summary=f"Detected ROT13-encoded canary token ({mask_secret(canary)}) in content",
+                        source_context=source_ctx.source_type.value,
+                        recommended_action=DecisionAction.BLOCK,
+                    )
+                )
+
+        # 2. Configured Sensitive Secrets Flexible Scan
         for secret in self.configured_secrets:
             if not secret:
                 continue
-            idx = 0
-            while True:
-                found_at = text.find(secret, idx)
-                if found_at == -1:
-                    break
-                end_pos = found_at + len(secret)
+            token_rgx = self._get_token_regex(secret)
+            for match in token_rgx.finditer(text):
+                found_at, end_pos = match.span()
+                span_key = (found_at, end_pos)
+                if span_key in reported_spans:
+                    continue
+                reported_spans.add(span_key)
+
                 findings.append(
                     DetectionFinding(
                         rule_id="SEC-CONFIG-001",
@@ -153,12 +224,16 @@ class SecretScanner:
                         recommended_action=DecisionAction.BLOCK,
                     )
                 )
-                idx = end_pos
 
         # 3. Known Secret-Like Patterns Scan
         for rule_id, pattern_name, regex, severity in SECRET_PATTERNS:
             for match in regex.finditer(text):
                 matched_val = match.group(0)
+                span_key = (match.start(), match.end())
+                if span_key in reported_spans:
+                    continue
+                reported_spans.add(span_key)
+
                 findings.append(
                     DetectionFinding(
                         rule_id=rule_id,
@@ -175,5 +250,61 @@ class SecretScanner:
                         recommended_action=DecisionAction.SANITIZE if source_ctx.source_type.value in {"uploaded_document", "retrieved_webpage"} else DecisionAction.BLOCK,
                     )
                 )
+
+        # 4. Auxiliary Channel Scan (Base64, Hex, and Decoded Payloads)
+        if auxiliary_channels:
+            for channel_type, decoded_text in auxiliary_channels:
+                for canary in self.canary_tokens:
+                    if not canary:
+                        continue
+                    token_rgx = self._get_token_regex(canary)
+                    if token_rgx.search(decoded_text):
+                        findings.append(
+                            DetectionFinding(
+                                rule_id="SEC-CANARY-001-ENCODED",
+                                category=RuleCategory.SECRET_EXFILTRATION,
+                                severity=Severity.CRITICAL,
+                                confidence=0.99,
+                                evidence_span=None,
+                                safe_evidence_summary=f"Detected obfuscated canary token ({mask_secret(canary)}) inside decoded {channel_type}",
+                                source_context=source_ctx.source_type.value,
+                                recommended_action=DecisionAction.BLOCK,
+                            )
+                        )
+
+                for secret in self.configured_secrets:
+                    if not secret:
+                        continue
+                    token_rgx = self._get_token_regex(secret)
+                    if token_rgx.search(decoded_text):
+                        findings.append(
+                            DetectionFinding(
+                                rule_id="SEC-CONFIG-001-ENCODED",
+                                category=RuleCategory.SECRET_EXFILTRATION,
+                                severity=Severity.CRITICAL,
+                                confidence=0.98,
+                                evidence_span=None,
+                                safe_evidence_summary=f"Detected obfuscated sensitive credential ({mask_secret(secret)}) inside decoded {channel_type}",
+                                source_context=source_ctx.source_type.value,
+                                recommended_action=DecisionAction.BLOCK,
+                            )
+                        )
+
+                for rule_id, pattern_name, regex, severity in SECRET_PATTERNS:
+                    match = regex.search(decoded_text)
+                    if match:
+                        matched_val = match.group(0)
+                        findings.append(
+                            DetectionFinding(
+                                rule_id=f"{rule_id}-ENCODED",
+                                category=RuleCategory.SECRET_EXFILTRATION,
+                                severity=severity,
+                                confidence=0.95,
+                                evidence_span=None,
+                                safe_evidence_summary=f"Detected credential signature matching {pattern_name} ({mask_secret(matched_val)}) inside decoded {channel_type}",
+                                source_context=source_ctx.source_type.value,
+                                recommended_action=DecisionAction.BLOCK,
+                            )
+                        )
 
         return findings

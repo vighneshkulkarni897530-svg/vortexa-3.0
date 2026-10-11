@@ -55,23 +55,56 @@ class PolicyClient:
         # 1. Attempt remote policy call if configured
         if self.service_url:
             try:
-                payload = {
-                    "source_type": source_type.value,
-                    "risk_classification": risk_classification.value,
-                    "risk_score": risk_score,
-                    "recommended_action": recommended_action.value,
-                    "finding_count": len(findings),
-                    "finding_categories": list({f.category.value for f in findings}),
-                    "tenant_context": tenant_context,
+                source_type_map = {
+                    SourceType.USER_PROMPT: "USER_PROMPT",
+                    SourceType.UPLOADED_DOCUMENT: "RETRIEVED_DOC",
+                    SourceType.RETRIEVED_WEBPAGE: "RETRIEVED_DOC",
+                    SourceType.TOOL_OUTPUT: "TOOL_OUTPUT",
                 }
+                mapped_source = source_type_map.get(source_type, "USER_PROMPT")
+
+                findings_payload = [
+                    {
+                        "detector_name": f.rule_id,
+                        "threat_category": f.category.value,
+                        "severity": f.severity.value,
+                        "confidence": f.confidence,
+                        "matched_spans": [
+                            {
+                                "start": f.evidence_span.start,
+                                "end": f.evidence_span.end,
+                                "span_type": f.category.value,
+                            }
+                        ] if f.evidence_span else [],
+                        "details": {
+                            "safe_evidence_summary": f.safe_evidence_summary,
+                            "recommended_action": f.recommended_action.value,
+                            "source_context": f.source_context,
+                        },
+                    }
+                    for f in findings
+                ]
+
+                payload = {
+                    "source_type": mapped_source,
+                    "detection_findings": findings_payload,
+                    "metadata": {
+                        "risk_classification": risk_classification.value,
+                        "risk_score": risk_score,
+                        "recommended_action": recommended_action.value,
+                        "tenant_context": tenant_context,
+                    },
+                }
+                base_url = self.service_url.rstrip("/")
                 with httpx.Client(timeout=self.timeout_seconds) as client:
-                    resp = client.post(f"{self.service_url}/api/v1/policy/evaluate", json=payload)
+                    resp = client.post(f"{base_url}/api/v1/enforce", json=payload)
                     if resp.status_code == 200:
                         data = resp.json()
+                        action_str = data.get("final_action", "BLOCK").upper()
                         return PolicyEvaluationResult(
-                            final_decision=DecisionAction(data["final_decision"]),
-                            decision_reason=data.get("decision_reason", "Policy enforced by external policy engine"),
-                            policy_version=data.get("policy_version", self.fallback_policy_version),
+                            final_decision=DecisionAction[action_str],
+                            decision_reason="; ".join(data.get("reason_codes", [])) or "Policy enforced by external policy engine",
+                            policy_version=str(data.get("policy_version", self.fallback_policy_version)),
                         )
                     else:
                         logger.warning(f"Remote policy service returned status {resp.status_code}; using fail-secure fallback")

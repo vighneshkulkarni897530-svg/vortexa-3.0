@@ -91,7 +91,9 @@ class RiskAssessmentEngine:
                 )
                 recommended_action = DecisionAction.SANITIZE if can_sanitize else DecisionAction.BLOCK
         elif has_medium:
-            if any(f.evidence_span is not None for f in actionable_findings):
+            if any(f.recommended_action == DecisionAction.ESCALATE for f in actionable_findings):
+                recommended_action = DecisionAction.ESCALATE
+            elif any(f.evidence_span is not None for f in actionable_findings):
                 recommended_action = DecisionAction.SANITIZE
             else:
                 recommended_action = DecisionAction.ESCALATE

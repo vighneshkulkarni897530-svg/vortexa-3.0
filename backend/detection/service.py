@@ -76,6 +76,7 @@ class DetectionEngineService:
         secret_findings = self.secret_scanner.scan(
             text=norm_result.normalized_text,
             source_ctx=source_ctx,
+            auxiliary_channels=norm_result.auxiliary_channels,
         )
 
         # Combine all explainable findings
@@ -95,7 +96,23 @@ class DetectionEngineService:
                 findings=all_findings,
             )
             if sanit_result.is_safe and sanit_result.sanitized_content is not None:
-                sanitized_content = sanit_result.sanitized_content
+                # Invariant: Sanitized content is revalidated before forwarding
+                reval_norm = self.normalizer.normalize(sanit_result.sanitized_content)
+                reval_injection = self.rule_engine.evaluate(
+                    text=reval_norm.normalized_text,
+                    source_ctx=source_ctx,
+                    auxiliary_channels=reval_norm.auxiliary_channels,
+                )
+                reval_secrets = self.secret_scanner.scan(reval_norm.normalized_text, source_ctx)
+                reval_threats = [
+                    f for f in (reval_injection + reval_secrets)
+                    if f.severity in (Severity.HIGH, Severity.CRITICAL)
+                ]
+                if reval_threats:
+                    sanitized_content = None
+                    recommended_action = DecisionAction.BLOCK
+                else:
+                    sanitized_content = sanit_result.sanitized_content
             else:
                 # Sanitization could not be safely guaranteed -> upgrade to fallback action
                 recommended_action = sanit_result.fallback_action

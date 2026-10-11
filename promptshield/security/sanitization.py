@@ -5,6 +5,10 @@ from typing import Any, Dict, List, Union
 SECRET_PATTERNS = [
     # AWS Access Key ID
     (re.compile(r"AKIA[0-9A-Z]{16}", re.IGNORECASE), "[REDACTED_AWS_KEY]"),
+    # GitHub Personal Access Token
+    (re.compile(r"ghp_[0-9A-Za-z]{36}", re.IGNORECASE), "[REDACTED_GITHUB_TOKEN]"),
+    # Synthetic Canary Tokens
+    (re.compile(r"CANARY_[0-9A-Z_]+|VRTX-[0-9A-Z_\-]+|SYNTHETIC-CANARY-[0-9A-Z_\-]+", re.IGNORECASE), "[REDACTED_SECRET]"),
     # Generic API Keys / Bearer tokens
     (re.compile(r"Bearer\s+[A-Za-z0-9\-_\.=]{20,}", re.IGNORECASE), "Bearer [REDACTED_TOKEN]"),
     (re.compile(r"(?:api_key|apikey|secret|token|password|auth)[\s:=]+['\"]?([a-zA-Z0-9_\-]{16,})['\"]?", re.IGNORECASE), "[REDACTED_SECRET]"),

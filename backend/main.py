@@ -10,7 +10,12 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from dataclasses import asdict
+from fastapi.middleware.cors import CORSMiddleware
+
 from backend.config import settings
+from backend.detection.benchmark_dataset import BENCHMARK_DATASET
+from backend.detection.benchmark_runner import BenchmarkRunner
 from backend.detection.rules import ALL_RULES
 from backend.detection.schemas import (
     DecisionAction,
@@ -38,6 +43,15 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# Attach CORS middleware for frontend communication
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Attach defense middlewares
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestValidationMiddleware)
@@ -45,6 +59,7 @@ app.add_middleware(RequestValidationMiddleware)
 # Initialize core services
 detection_service = DetectionEngineService()
 llm_adapter = LLMAdapter()
+benchmark_runner = BenchmarkRunner(detection_service)
 
 
 # Custom exception handlers preventing stack trace leakage
@@ -138,6 +153,42 @@ async def list_rules():
     return {"total_rules": len(rule_list), "rules": rule_list, "scoring_documentation": scoring_guide}
 
 
+@app.get(
+    "/api/v1/benchmark/dataset",
+    tags=["Testing & Evaluation"],
+    summary="Get labelled benchmark dataset samples",
+)
+async def get_benchmark_dataset():
+    """Retrieve full labelled benchmark dataset across direct, indirect, secret, and benign categories."""
+    return {
+        "dataset_name": "vortexa_c03_injection_benchmark",
+        "dataset_version": "1.0.0",
+        "total_samples": len(BENCHMARK_DATASET),
+        "samples": [
+            {
+                "id": s.id,
+                "content": s.content,
+                "source_type": s.source_type.value,
+                "is_malicious": s.is_malicious,
+                "attack_category": s.attack_category,
+                "description": s.description,
+            }
+            for s in BENCHMARK_DATASET
+        ],
+    }
+
+
+@app.post(
+    "/api/v1/benchmark/run",
+    tags=["Testing & Evaluation"],
+    summary="Execute live benchmark evaluation and return verified confusion matrix",
+)
+async def run_benchmark():
+    """Execute evaluation suite against the active PromptShield pipeline and return honest metrics."""
+    report = benchmark_runner.run_benchmark()
+    return asdict(report)
+
+
 class ScreenedLLMRequest(ScanRequest):
     """Extended request for end-to-end screened LLM execution."""
     system_instruction: str = "You are a helpful and secure AI assistant protected by PromptShield."
@@ -180,3 +231,33 @@ async def screened_llm_generate(request: ScreenedLLMRequest):
         }
     except (SecurityBypassException, SecurityLeakageException) as se:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(se))
+
+
+# Mount Frontend UI for Live Evaluation & Demonstration (Laptop 1)
+import os
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+_base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_frontend_dir = os.path.join(_base_dir, "Froentend")
+if not os.path.exists(_frontend_dir):
+    _frontend_dir = os.path.join(_base_dir, "frontend")
+
+if os.path.exists(_frontend_dir):
+    app.mount("/static", StaticFiles(directory=_frontend_dir), name="static")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_index():
+        idx_path = os.path.join(_frontend_dir, "index.html")
+        if os.path.exists(idx_path):
+            return FileResponse(idx_path)
+        return {"service": settings.SERVICE_NAME, "status": "ONLINE"}
+
+    @app.get("/styles.css", include_in_schema=False)
+    async def serve_css():
+        return FileResponse(os.path.join(_frontend_dir, "styles.css"))
+
+    @app.get("/app.js", include_in_schema=False)
+    async def serve_js():
+        return FileResponse(os.path.join(_frontend_dir, "app.js"))
+

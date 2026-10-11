@@ -85,7 +85,7 @@ class NormalizedContentMetadata(BaseModel):
 class ScanRequest(BaseModel):
     """Input payload for content security scanning."""
     scan_id: Optional[str] = Field(None, description="Optional scan identifier provided by caller")
-    content: str = Field(..., description="Raw untrusted content to inspect")
+    content: str = Field(..., min_length=1, description="Raw untrusted content to inspect")
     source_type: SourceType = Field(..., description="Origin of the content")
     trusted_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Server-validated metadata")
     application_context: Optional[str] = Field(default=None, description="Target application name or ID")
@@ -94,8 +94,8 @@ class ScanRequest(BaseModel):
     @field_validator("content")
     @classmethod
     def validate_content_not_empty(cls, v: str) -> str:
-        if v is None:
-            raise ValueError("Content cannot be null")
+        if v is None or not v.strip():
+            raise ValueError("Content cannot be empty or whitespace only")
         return v
 
 

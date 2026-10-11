@@ -1,148 +1,172 @@
 # PromptShield — Enterprise LLM Defense & Policy Enforcement System
-**VORTEXA 3.0 (C-03) Cybersecurity & Digital Trust Track**
+**VORTEXA 3.0 (Problem Statement C-03) Cybersecurity & Digital Trust Track**
 
-PromptShield is an enterprise-grade high-assurance defensive middleware platform designed to protect Large Language Model (LLM) applications against prompt injection (direct and indirect), canary token leakage, and unauthorized data exfiltration.
+PromptShield is an enterprise-grade, high-assurance defensive middleware platform designed to protect Large Language Model (LLM) applications against prompt injection (direct and indirect), canary token leakage, and unauthorized data exfiltration.
 
----
-
-## 1. System Overview & Multi-Laptop Architecture
-
-PromptShield is engineered as a decoupled, multi-laptop defense ecosystem:
-
-| Role / Component | Domain / Directory | Responsibilities & Integration Contracts |
-| :--- | :--- | :--- |
-| **Laptop 2: Detection Logic** | `backend/` | Inspects untrusted inputs (`POST /api/v1/scan`), performs normalization, multi-signal injection detection, secret scanning, calibrated risk assessment (0.00–1.00), and guarded LLM execution. Submits detector findings to Laptop 3 at `POST /api/v1/enforce`. |
-| **Laptop 3: Policy & Database** | `promptshield/` & `alembic/` | Authoritative persistence layer owning PostgreSQL schema, SQLAlchemy models, Alembic migrations, JWT/RBAC auth, deterministic Policy Engine (`BLOCK` $\succ$ `ESCALATE` $\succ$ `SANITIZE` $\succ$ `ALLOW`), Human Review Queue, and append-only audit persistence. |
-| **Laptop 1: Frontend UI** | Frontend Clients | Interacts with Policy Administration (`/api/v1/policies`), Human Review Queue (`/api/v1/review-queue`), Audit Trail (`/api/v1/audit-events`), and Real-Time Inspection Dashboards. |
-| **Laptop 4: Testing & Evaluation** | `tests/` | Executes benchmarking suites and submits test dataset metrics to `POST /api/v1/evaluations` to track confusion matrices without metric fabrication. |
+Branch: `feature/testing-deployment`
 
 ---
 
-## 2. Detection Engine Architecture (`backend/`)
+## 1. System Overview & Integrated Multi-Laptop Architecture
 
-The detection engine implements a 7-stage deterministic security pipeline:
+PromptShield is engineered as a unified, decoupled defense ecosystem integrating all four team modules:
 
-```
-[Untrusted Input]
-       │
-       ▼
-[Stage A: Validation] ──▶ Reject malformed/oversized payloads (>1MB), enforce UTF-8
-       │
-       ▼
-[Stage B: Normalization] ──▶ Unicode NFKC, homoglyph folding, zero-width strip, bounded URL & Base64 decoding
-       │
-       ▼
-[Stage C: Injection Detection] ──▶ Multi-signal detection (System overrides, jailbreaks, exfil, tool manipulation)
-       │
-       ▼
-[Stage D: Secret Protection] ──▶ Canary token & sensitive pattern matching (redacted from outputs & logs)
-       │
-       ▼
-[Stage E: Risk Assessment] ──▶ Calibrated risk index (0.00 - 1.00) & recommendation (ALLOW, SANITIZE, BLOCK, ESCALATE)
-       │
-       ▼
-[Stage F: Sanitization] ──▶ Surgical excision of isolated malicious spans (preserves legitimate content)
-       │
-       ▼
-[Stage G: Policy Handoff] ──▶ Handoff to trusted Policy Authority (Laptop 3) with fail-secure local fallback
-       │
-       ▼
-[Authorized LLM Invocation] ──▶ LLM Adapter (screening proof required) + Output Guard (canary leakage check)
-```
-
-### Module Responsibilities:
-- `backend/detection/normalization.py` — Bounded decoding, homoglyph confusable normalization, zero-width strip.
-- `backend/detection/source_context.py` — Evaluates origin (`user_prompt`, `uploaded_document`, `retrieved_webpage`, `tool_output`) and assigns strict server-side authority levels.
-- `backend/detection/rules.py` — Explainable multi-signal injection detection rules with benign discussion filters.
-- `backend/detection/secret_scanner.py` — Canary token and credential detection with automatic non-disclosure masking.
-- `backend/detection/risk_assessment.py` — Multi-signal risk aggregation and score computation.
-- `backend/detection/sanitizer.py` — Precise span-based sanitization for passive documents and webpages.
-- `backend/policy/client.py` — Coordination client for Laptop 3's persistent policy service.
-- `backend/llm/adapter.py` — Provider-neutral execution gate preventing direct screening bypass.
-- `backend/llm/output_guard.py` — Post-generation inspection blocking canary leaks in generated text.
-- `backend/tools/security.py` — Server-side tool allowlists, argument validation, and SSRF prevention.
-
-### Documented Risk Score Interpretation
-$$\text{Risk Score} = \min\left(1.0, \max_{i}(\text{weight}_i \times \text{confidence}_i) + \sum_{i} 0.05 \times (\text{weight}_i \times \text{confidence}_i)\right)$$
-
-| Score Range | Classification | Action | Documented Interpretation |
+| Role / Module | Directory / Service | Port | Responsibilities & Integration Contracts |
 | :--- | :--- | :--- | :--- |
-| **0.00 – 0.19** | `SAFE` | `ALLOW` | Content contains no detected threats or only benign, quoted educational references. |
-| **0.20 – 0.44** | `LOW` | `ALLOW` | Low-severity anomalies or benign discussions mentioning security concepts. |
-| **0.45 – 0.69** | `MEDIUM` | `SANITIZE` / `ESCALATE` | Suspected indirect injection or ambiguous directives in untrusted data. |
-| **0.70 – 0.89** | `HIGH` | `BLOCK` / `SANITIZE` | Direct prompt injection attempt, jailbreak payload, or unauthorized tool request. |
-| **0.90 – 1.00** | `CRITICAL` | `BLOCK` | Active canary secret extraction, exfiltration payload, or destructive tool execution. |
+| **Laptop 1: Frontend Dashboard** | `frontend/`, `Froentend/` | `3000` / `8000` | Real-time Operations Center: Interactive Screening Workbench, Pipeline Visualizer, Policy Studio, Human Review Queue, Audit Trail, and Live Benchmark Evaluation. |
+| **Laptop 2: Detection Engine** | `backend/` | `8000` | 7-stage deterministic security pipeline: Input validation (>1MB rejection), NFKC normalization, multi-signal rule matching, canary scanner, calibrated risk scoring (0.00–1.00), surgical sanitization, and fail-secure handoff to Policy service. |
+| **Laptop 3: Policy & Database** | `promptshield/`, `alembic/` | `8001` | Authoritative persistence layer: PostgreSQL 16 schema, Alembic migrations, JWT/RBAC auth (`admin`, `reviewer`, `auditor`), deterministic policy hierarchy (`BLOCK` $\succ$ `ESCALATE` $\succ$ `SANITIZE` $\succ$ `ALLOW`), Review Queue, and tamper-evident audit log. |
+| **Laptop 4: Testing & DevSecOps** | `tests/`, `scripts/`, `data/` | N/A | 122 automated tests (Unit, Backend Integration, Security Regression Invariants, Frontend Integration), 60-sample labelled benchmark dataset, and confusion matrix generator. |
 
 ---
 
-## 3. Policy Management & Database Layer (`promptshield/`)
+## 2. Measured Evaluation Benchmark Results
 
-### Database Models & Schema
-1. **`users`**: RBAC identities (`admin`, `reviewer`, `auditor`, `user`, `service`) with PBKDF2-HMAC-SHA256 credentials.
-2. **`security_policies`**: Master policy configuration including enabled status, source applicability, rule configurations, severity thresholds, default action, and current version.
-3. **`policy_versions`**: Immutable audit history of configuration snapshots. Updates append new versions rather than overwriting history.
-4. **`scan_records`**: Operational scan records containing correlation ID, source type, detector findings, final action, risk classification, reason codes, and redacted evidence.
-5. **`review_cases`**: Human-in-the-loop review queue for escalated findings with mandatory reviewer justifications.
-6. **`audit_events`**: Append-only, tamper-evident audit trail capturing actors, resources, actions, outcomes, and redacted metadata.
-7. **`evaluation_runs`**: Persists benchmark runs with sample counts and confusion matrices (TP, FP, TN, FN), computing precision, recall, FPR, and FNR.
+Evaluated directly against the active PromptShield pipeline using 60 curated, version-controlled samples (`data/labelled_benchmark_dataset_v1.json`):
 
-### Deterministic Precedence Hierarchy
-When conflicting detection rules trigger on a single scan payload:
-$$\mathbf{BLOCK} \succ \mathbf{ESCALATE} \succ \mathbf{SANITIZE} \succ \mathbf{ALLOW}$$
+| Metric | Measured Value | Standard Formula & Notes |
+| :--- | :--- | :--- |
+| **Dataset Size** | **60 Samples** | 40 Malicious, 12 Legitimate, 8 Ambiguous |
+| **True Positives (TP)** | **39** | Malicious attacks correctly intercepted (`BLOCK` or `SANITIZE`) |
+| **False Positives (FP)** | **0** | Legitimate queries mistakenly intercepted (**0% FPR**) |
+| **True Negatives (TN)** | **12** | Legitimate queries correctly permitted (`ALLOW`) |
+| **False Negatives (FN)** | **1** | Malicious attack missed (Disclosed: `OBF-008` Unicode BiDi) |
+| **Precision** | **100.00%** | $\text{TP} / (\text{TP} + \text{FP}) = 39 / (39 + 0)$ |
+| **Recall** | **97.50%** | $\text{TP} / (\text{TP} + \text{FN}) = 39 / (39 + 1)$ |
+| **False Positive Rate** | **0.00%** | $\text{FP} / (\text{FP} + \text{TN}) = 0 / (0 + 12)$ |
+| **False Negative Rate** | **2.50%** | $\text{FN} / (\text{FN} + \text{TP}) = 1 / (1 + 39)$ |
+| **Binary Classification Accuracy** | **98.08%** | $(\text{TP} + \text{TN}) / (\text{TP} + \text{TN} + \text{FP} + \text{FN}) = 51 / 52$ |
+| **Average Scan Latency** | **1.09 ms** | Min: 0.16 ms, Median: 0.81 ms, Max: 7.74 ms |
 
-- **`BLOCK` (Precedence 40)**: Confirmed critical/high-severity threats. Never overridden by allow rules.
-- **`ESCALATE` (Precedence 30)**: High uncertainty or indirect injection found in untrusted sources (`RETRIEVED_DOC`, `TOOL_OUTPUT`).
-- **`SANITIZE` (Precedence 20)**: Surgical span excision. Escalates to `BLOCK` if empty/unsafe.
-- **`ALLOW` (Precedence 10)**: Baseline default applied only when no higher-priority security rule is triggered.
+### 4-Action Disposition Distribution
+- **`BLOCK`**: 28 samples (46.7%) — Direct injections, destructive commands, active canary exfiltration.
+- **`SANITIZE`**: 11 samples (18.3%) — Indirect injections in passive documents/webpages where benign text was preserved.
+- **`ESCALATE`**: 6 samples (10.0%) — Ambiguous technical directives routed to human review queue.
+- **`ALLOW`**: 15 samples (25.0%) — Benign user requests, technical discussions, and 1 missed attack.
+
+*Full details and per-category breakdowns available in [EVALUATION_REPORT.md](file:///d:/Vortexa%203.0/EVALUATION_REPORT.md).*
 
 ---
 
-## 4. Environment Setup & Installation
+## 3. Quick Start & Setup (Windows PowerShell)
 
-### 1. Create and Activate Virtual Environment
+### Step 1: Clone Repository & Switch Branch
+```powershell
+git checkout feature/testing-deployment
+```
+
+### Step 2: Create & Activate Virtual Environment
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 2. Install Dependencies
+### Step 3: Install Required Dependencies
 ```powershell
 pip install -r requirements.txt
 ```
 
-### 3. Configure Environment
-Copy `.env.example` to `.env`:
+### Step 4: Configure Environment File
 ```powershell
-cp .env.example .env
+Copy-Item .env.example .env
+```
+*(Verify `.env` has placeholder test tokens only; never commit credentials).*
+
+### Step 5: Initialize Database & Apply Migrations
+```powershell
+# Applies all Alembic database schema migrations
+alembic upgrade head
 ```
 
 ---
 
-## 5. Running the Application Services
+## 4. Running Application Services (Windows PowerShell)
 
-### Running the Detection Engine (Laptop 2 Service)
+PromptShield can be launched locally in two terminal windows:
+
+### Terminal 1: Detection Engine & Integrated Web UI (Laptop 2 & 1)
 ```powershell
 python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-- Swagger UI: `http://localhost:8000/docs`
-- Health check: `http://localhost:8000/health`
+- **Web Dashboard**: [http://localhost:8000/](http://localhost:8000/)
+- **Swagger API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
 
-### Running the Policy & Database Engine (Laptop 3 Service)
+### Terminal 2: Policy & Database Engine (Laptop 3)
 ```powershell
-# Run database migrations
-alembic upgrade head
-
-# Run Policy & DB API server
 python -m uvicorn promptshield.main:app --host 0.0.0.0 --port 8001 --reload
 ```
-- Interactive API Docs: `http://localhost:8001/docs`
-- Health check: `http://localhost:8001/api/v1/health`
+- **Swagger API Docs**: [http://localhost:8001/docs](http://localhost:8001/docs)
+- **Health Check**: [http://localhost:8001/api/v1/health](http://localhost:8001/api/v1/health)
 
 ---
 
-## 6. Automated Testing
+## 5. Automated Verification & Testing Commands
 
-Run the full unified test suite across both subsystems:
+Execute all 122 automated tests via `pytest`:
+
 ```powershell
-python -m pytest -v
+# 1. Run all 122 automated unit, integration, and regression tests
+pytest -v
+
+# 2. Run Backend Integration Test Suite (16 tests)
+pytest tests/test_backend_integration.py -v
+
+# 3. Run Security Regression Invariant Suite (10 tests)
+pytest tests/test_security_regression.py -v
+
+# 4. Run Frontend Integration Test Suite (10 tests)
+pytest tests/test_frontend_integration.py -v
+
+# 5. Run Live 60-Sample Evaluation Benchmark Script
+python scripts/evaluate_promptshield.py
 ```
+
+### Verified Security Invariants (10 Passed)
+1. **Invariant 1**: Blocked content never reaches the LLM adapter.
+2. **Invariant 2**: Escalated content never reaches the LLM before authorized resolution.
+3. **Invariant 3**: Sanitized content is revalidated before forwarding.
+4. **Invariant 4**: Untrusted documents and tool outputs cannot modify policies.
+5. **Invariant 5**: Tool calls require explicit server authorization.
+6. **Invariant 6**: Unauthorized destinations and SSRF attempts are rejected.
+7. **Invariant 7**: Secrets and canary tokens are redacted from logs and responses.
+8. **Invariant 8**: Unauthorized users cannot access protected review or policy functions.
+9. **Invariant 9**: Malformed and encoded inputs cannot bypass validation.
+10. **Invariant 10**: Policy service network failure fails secure (`BLOCK`).
+
+---
+
+## 6. Docker Compose Deployment
+
+To deploy the entire multi-container stack (Frontend Nginx, FastAPI Detection, FastAPI Policy, PostgreSQL 16, and Alembic migrations):
+
+```powershell
+# 1. Start all containers in detached mode
+docker compose up -d --build
+
+# 2. Check running container health status
+docker compose ps
+
+# 3. View logs
+docker compose logs -f
+
+# 4. Run automated test runner inside container network
+docker compose --profile test run --rm test-runner
+
+# 5. Graceful shutdown
+docker compose down
+```
+
+See [DEPLOYMENT.md](file:///d:/Vortexa%203.0/DEPLOYMENT.md) for full container topology and multi-server instructions.
+
+---
+
+## 7. Deliverables & Documentation Index
+
+- [INTEGRATION_CHECKLIST.md](file:///d:/Vortexa%203.0/INTEGRATION_CHECKLIST.md) — 10-step integration protocol and cross-laptop schema contracts.
+- [EVALUATION_REPORT.md](file:///d:/Vortexa%203.0/EVALUATION_REPORT.md) — Complete evaluation report with 4-action confusion matrix and honest metrics.
+- [DEPLOYMENT.md](file:///d:/Vortexa%203.0/DEPLOYMENT.md) — Docker Compose, standalone microservice setup, CORS, and TLS configurations.
+- [DEMO_SCRIPT.md](file:///d:/Vortexa%203.0/DEMO_SCRIPT.md) — 5-minute live demonstration script covering all 9 presentation flows.
+- [KNOWN_ISSUES.md](file:///d:/Vortexa%203.0/KNOWN_ISSUES.md) — Technical RCA of missed attack `OBF-008` (Unicode BiDi) and mitigation roadmap.
+- [data/DATASET_DOCUMENTATION.md](file:///d:/Vortexa%203.0/data/DATASET_DOCUMENTATION.md) — Benchmark dataset schema, labeling criteria, and category counts.
+- [data/labelled_benchmark_dataset_v1.json](file:///d:/Vortexa%203.0/data/labelled_benchmark_dataset_v1.json) — 60 curated evaluation samples.

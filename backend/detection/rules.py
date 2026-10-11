@@ -44,7 +44,7 @@ SYSTEM_OVERRIDE_PATTERNS = [
         base_severity=Severity.HIGH,
         base_confidence=0.92,
         regex=re.compile(
-            r"\b(?:ignore|disregard|forget|override|neglect|dismiss)\s+(?:all\s+)?(?:previous|prior|above|initial|system)\s+(?:instructions|prompts|rules|directives|constraints|guidelines)\b",
+            r"\b(?:ignore|disregard|forget|override|neglect|dismiss)\s+(?:all\s+|your\s+|any\s+)?(?:previous\s+|prior\s+|above\s+|initial\s+|system\s+)?(?:instruction|prompt|rule|directive|constraint|guideline)s?\b",
             re.IGNORECASE,
         ),
         summary_template="Direct imperative command attempting to discard or override system instructions",
@@ -57,7 +57,7 @@ SYSTEM_OVERRIDE_PATTERNS = [
         base_severity=Severity.HIGH,
         base_confidence=0.88,
         regex=re.compile(
-            r"\b(?:you\s+are\s+now|act\s+as|pretend\s+to\s+be)\s+(?:DAN|Do\s+Anything\s+Now|an\s+unrestricted\s+AI|evil\s+AI|developer\s+mode|jailbroken|unfiltered)\b",
+            r"\b(?:you\s+are\s+now|act\s+as|pretend\s+(?:you\s+are\s+in|to\s+be|you\s+are\s+a)|you\s+are\s+a)\s+(?:DAN|Do\s+Anything\s+Now|an\s+unrestricted\s+AI|evil\s+AI|developer\s+mode|jailbroken|unfiltered|red\s+team\s+penetration\s+testing)\b",
             re.IGNORECASE,
         ),
         summary_template="Persona hijack attempting to induce unrestricted/DAN operational mode",
@@ -70,7 +70,7 @@ SYSTEM_OVERRIDE_PATTERNS = [
         base_severity=Severity.HIGH,
         base_confidence=0.90,
         regex=re.compile(
-            r"(?:<\s*\|\s*im_start\s*\|\s*system|\[\s*SYSTEM\s*(?:INSTRUCTION|MESSAGE|PROMPT)?\s*\]|<<SYS>>|===\s*SYSTEM\s*===)",
+            r"(?:<\s*\|\s*im_start\s*\|?>?\s*system|\[\s*SYSTEM\s*(?:INSTRUCTION|MESSAGE|PROMPT)?\s*\]|<<SYS>>|===\s*SYSTEM\s*===)",
             re.IGNORECASE,
         ),
         summary_template="Artificial prompt delimiter attempting to forge trusted system boundaries",
@@ -128,7 +128,7 @@ PROMPT_DISCLOSURE_PATTERNS = [
         base_severity=Severity.HIGH,
         base_confidence=0.91,
         regex=re.compile(
-            r"\b(?:repeat|print|reveal|output|echo|display|show\s+me)\s+(?:everything\s+above|the\s+entire\s+prompt|your\s+(?:initial|system|developer|hidden)\s+(?:prompt|instructions|directives|rules))\b",
+            r"\b(?:repeat|print|reveal|output|echo|display|show\s+me)\s+(?:(?:in\s+markdown\s+(?:codeblock\s+)?)?\s*(?:everything\s+above|the\s+entire\s+(?:system\s+|initial\s+)?(?:prompt|message|instruction)s?|(?:the\s+|your\s+|initial\s+|system\s+|developer\s+|hidden\s+)*(?:prompt|instructions?|directives?|rules?)))\b",
             re.IGNORECASE,
         ),
         summary_template="Imperative command instructing the model to disclose protected system prompts",
@@ -174,6 +174,19 @@ DATA_EXFILTRATION_PATTERNS = [
             re.IGNORECASE,
         ),
         summary_template="Instruction commanding the model or tool to exfiltrate private data to an external address",
+        recommended_action=DecisionAction.BLOCK,
+    ),
+    RuleDefinition(
+        rule_id="INJ-EXFIL-003",
+        name="SSRF / Cloud Metadata Exfiltration",
+        category=RuleCategory.DATA_TRANSFER,
+        base_severity=Severity.CRITICAL,
+        base_confidence=0.96,
+        regex=re.compile(
+            r"(?:169\.254\.169\.254|metadata\.google\.internal|latest/meta-data|attacker-c2\.net)",
+            re.IGNORECASE,
+        ),
+        summary_template="Attempt to access cloud instance metadata or unauthorized external C2 destination",
         recommended_action=DecisionAction.BLOCK,
     ),
 ]
@@ -223,6 +236,87 @@ POLICY_MANIPULATION_PATTERNS = [
     ),
 ]
 
+ANOMALOUS_STRUCTURE_PATTERNS = [
+    RuleDefinition(
+        rule_id="ANOM-STRUCT-001",
+        name="Maintenance Mode Override Directive in Technical Document",
+        category=RuleCategory.ANOMALOUS_STRUCTURE,
+        base_severity=Severity.MEDIUM,
+        base_confidence=0.72,
+        regex=re.compile(
+            r"\b(?:maintenance\s+mode|administrative\s+reset|emergency\s+access|recovery\s+script).*?(?:override|ignore\s+lock)\b",
+            re.IGNORECASE,
+        ),
+        summary_template="Technical manual excerpt referencing override or ignore flags; context requires human reviewer verification",
+        recommended_action=DecisionAction.ESCALATE,
+    ),
+    RuleDefinition(
+        rule_id="ANOM-STRUCT-002",
+        name="Ambiguous Auth or Bypass Parameter in Query",
+        category=RuleCategory.ANOMALOUS_STRUCTURE,
+        base_severity=Severity.MEDIUM,
+        base_confidence=0.75,
+        regex=re.compile(
+            r"\b(?:auth_flag|bypass_check|security_override|auth_bypass|debug_mode=true)\b",
+            re.IGNORECASE,
+        ),
+        summary_template="Ambiguous parameter flag indicating security check bypass; requires analyst escalation",
+        recommended_action=DecisionAction.ESCALATE,
+    ),
+    RuleDefinition(
+        rule_id="ANOM-STRUCT-003",
+        name="Non-Routable Internal Network Endpoint Reference",
+        category=RuleCategory.ANOMALOUS_STRUCTURE,
+        base_severity=Severity.MEDIUM,
+        base_confidence=0.70,
+        regex=re.compile(
+            r"\b(?:internal-(?:proxy|service|api|db)\.corp|localhost:\d+)\b",
+            re.IGNORECASE,
+        ),
+        summary_template="Content references internal corporate endpoint; escalated to verify network policy compliance",
+        recommended_action=DecisionAction.ESCALATE,
+    ),
+    RuleDefinition(
+        rule_id="ANOM-STRUCT-004",
+        name="Governance Context Discussing System Instructions",
+        category=RuleCategory.ANOMALOUS_STRUCTURE,
+        base_severity=Severity.MEDIUM,
+        base_confidence=0.68,
+        regex=re.compile(
+            r"\b(?:governance\s+committee|policy\s+draft|compliance\s+audit).*?(?:system\s+instruction|prompt\s+guideline)s?\b",
+            re.IGNORECASE,
+        ),
+        summary_template="Governance or draft compliance document referencing prompt instructions; flagged for human review",
+        recommended_action=DecisionAction.ESCALATE,
+    ),
+    RuleDefinition(
+        rule_id="ANOM-STRUCT-005",
+        name="Security Anomaly in Operational Tool Output",
+        category=RuleCategory.ANOMALOUS_STRUCTURE,
+        base_severity=Severity.MEDIUM,
+        base_confidence=0.74,
+        regex=re.compile(
+            r"\b(?:status\s+403\s+on\s+path|unusual\s+bearer\s+token|removed\s+legacy\s+token\s+verification|legacy\s+token\s+verification\s+filter)\b",
+            re.IGNORECASE,
+        ),
+        summary_template="Security-relevant anomaly reported in tool output or code diff; escalated for operational verification",
+        recommended_action=DecisionAction.ESCALATE,
+    ),
+    RuleDefinition(
+        rule_id="ANOM-STRUCT-006",
+        name="Architecture Discussion Touching Prompt Structure",
+        category=RuleCategory.ANOMALOUS_STRUCTURE,
+        base_severity=Severity.MEDIUM,
+        base_confidence=0.65,
+        regex=re.compile(
+            r"\b(?:custom\s+prompt\s+prefix|langchain\s+prompt\s+template).*?(?:security\s+consideration|architecture)\b",
+            re.IGNORECASE,
+        ),
+        summary_template="Technical architectural inquiry discussing prompt structures; escalated for policy check",
+        recommended_action=DecisionAction.ESCALATE,
+    ),
+]
+
 ALL_RULES: List[RuleDefinition] = (
     SYSTEM_OVERRIDE_PATTERNS
     + SECURITY_BYPASS_PATTERNS
@@ -230,6 +324,7 @@ ALL_RULES: List[RuleDefinition] = (
     + DATA_EXFILTRATION_PATTERNS
     + TOOL_MANIPULATION_PATTERNS
     + POLICY_MANIPULATION_PATTERNS
+    + ANOMALOUS_STRUCTURE_PATTERNS
 )
 
 
@@ -254,18 +349,24 @@ class InjectionRuleEngine:
             if marker in text_lower:
                 return True
 
-        # Check surrounding window (up to 80 chars before and after)
-        window_start = max(0, match_start - 80)
-        window_end = min(len(text), match_end + 80)
+        # Check surrounding window (up to 160 chars before and after)
+        window_start = max(0, match_start - 160)
+        window_end = min(len(text), match_end + 160)
         surrounding_text = text_lower[window_start:window_end]
 
         benign_window_cues = [
             "for example", "such as", "e.g.", "known attack",
             "paper discusses", "research on", "sample payload",
-            "concept of", "what is", "explain what", "how does",
-            "vulnerability named", "definition of",
+            "concept of", "what is", "explain what", "explain the",
+            "explain how", "how does", "vulnerability named", "definition of",
+            "prevent attackers", "parameterized queries", "educational",
+            "defense against", "mitigate", "how to defend",
         ]
         if any(cue in surrounding_text for cue in benign_window_cues):
+            return True
+
+        # Check document-level query cues for explanation / defense inquiries
+        if any(q in text_lower for q in ["what does", "what is", "explain the concept", "how to mitigate", "how do parameterized"]):
             return True
 
         # Check if match is enclosed in quotation marks (e.g. "ignore previous instructions")
@@ -328,10 +429,13 @@ class InjectionRuleEngine:
                 severity = rule.base_severity
 
                 if source_ctx.source_type in {SourceType.UPLOADED_DOCUMENT, SourceType.RETRIEVED_WEBPAGE, SourceType.TOOL_OUTPUT}:
-                    effective_category = RuleCategory.INDIRECT_INJECTION
-                    effective_summary = f"Indirect prompt injection attempt in {source_ctx.source_type.value}: {rule.name}"
-                    # In documents or webpages, if safe sanitization is possible, recommend SANITIZE
-                    recommended_action = DecisionAction.SANITIZE
+                    if rule.recommended_action == DecisionAction.ESCALATE:
+                        effective_summary = f"Anomalous structure in {source_ctx.source_type.value}: {rule.name}"
+                        recommended_action = DecisionAction.ESCALATE
+                    else:
+                        effective_category = RuleCategory.INDIRECT_INJECTION
+                        effective_summary = f"Indirect prompt injection attempt in {source_ctx.source_type.value}: {rule.name}"
+                        recommended_action = DecisionAction.SANITIZE
 
                 findings.append(
                     DetectionFinding(
