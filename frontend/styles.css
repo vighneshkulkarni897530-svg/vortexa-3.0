@@ -3,34 +3,35 @@
  */
 
 :root {
-  --bg-primary: #080c14;
-  --bg-secondary: #0f172a;
-  --bg-card: rgba(15, 23, 42, 0.75);
-  --bg-card-hover: rgba(30, 41, 59, 0.85);
+  /* User-Specified Theme Palette */
+  --bg-primary: #0B0F17;        /* Slate Dark: Primary Background */
+  --bg-secondary: #161C28;      /* Deep Steel: Surface / Cards / Inputs / Code */
+  --bg-card: rgba(22, 28, 40, 0.92); /* Deep Steel Container */
+  --bg-card-hover: rgba(30, 39, 56, 0.98);
   --bg-glass: rgba(255, 255, 255, 0.03);
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(96, 165, 250, 0.5);
+  --border-focus: rgba(16, 185, 129, 0.5); /* Emerald Shield focus ring */
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #F9FAFB;      /* Crisp White: High readability */
+  --text-secondary: #D1D5DB;    /* Neutral off-white */
+  --text-muted: #9CA3AF;        /* Cool Gray: Subdued labels, subtitles, comments */
 
-  --accent-blue: #3b82f6;
-  --accent-cyan: #06b6d4;
-  --color-allow: #10b981;
+  --accent-primary: #10B981;    /* Emerald Shield: Passed / Secure */
+  --accent-secondary: #EF4444;  /* Crimson Threat: Blocked / Injection Attempt */
+  --color-allow: #10B981;       /* Emerald Shield: Passed / Secure */
   --color-allow-glow: rgba(16, 185, 129, 0.25);
-  --color-block: #ef4444;
+  --color-block: #EF4444;       /* Crimson Threat: Attack Alerts & Blocked */
   --color-block-glow: rgba(239, 68, 68, 0.25);
-  --color-sanitize: #f59e0b;
+  --color-sanitize: #F59E0B;    /* Amber Caution: Sanitized Content */
   --color-sanitize-glow: rgba(245, 158, 11, 0.25);
-  --color-escalate: #8b5cf6;
+  --color-escalate: #8B5CF6;    /* Violet Escalation: Ambiguous Review */
   --color-escalate-glow: rgba(139, 92, 246, 0.25);
 
   --font-sans: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.05);
-  --shadow-glow: 0 0 25px rgba(59, 130, 246, 0.2);
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.06);
+  --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -45,14 +46,14 @@
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--bg-primary); /* Slate Dark #0B0F17 */
+  color: var(--text-primary);     /* Crisp White #F9FAFB */
   min-height: 100vh;
   line-height: 1.5;
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-    linear-gradient(180deg, #080c14 0%, #0d1322 100%);
+    radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(239, 68, 68, 0.05) 0%, transparent 40%),
+    linear-gradient(180deg, #0B0F17 0%, #121824 100%);
   background-attachment: fixed;
   overflow-x: hidden;
 }
@@ -66,11 +67,11 @@ body {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #1e2638;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #2a354d;
 }
 
 /* Container */
@@ -99,26 +100,26 @@ body {
 .brand-logo-shield {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #10B981, #059669);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
 .brand-title h1 {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #ffffff, #93c5fd);
+  background: linear-gradient(90deg, #F9FAFB, #A7F3D0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .brand-title p {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .status-badges {
@@ -136,13 +137,13 @@ body {
   font-size: 0.78rem;
   font-weight: 600;
   border: 1px solid var(--border-subtle);
-  background: var(--bg-card);
+  background: var(--bg-secondary);
   backdrop-filter: blur(8px);
 }
 
 .badge-online {
   color: var(--color-allow);
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.35);
 }
 
 .pulse-dot {
@@ -173,7 +174,7 @@ body {
 .nav-tabs {
   display: flex;
   gap: 8px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(22, 28, 40, 0.75);
   padding: 6px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-subtle);
@@ -204,10 +205,10 @@ body {
 }
 
 .tab-btn.active {
-  color: #ffffff;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(124, 58, 237, 0.3));
-  border: 1px solid rgba(96, 165, 250, 0.4);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  color: #FFFFFF;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35));
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 /* Tab Content */
@@ -279,21 +280,21 @@ body {
   padding: 12px 10px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--bg-secondary);
   cursor: pointer;
   text-align: center;
   transition: all 0.2s ease;
 }
 
 .source-card:hover {
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(30, 39, 56, 0.95);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
 .source-card.selected {
-  background: rgba(37, 99, 235, 0.2);
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--color-allow);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
 }
 
 .source-card-icon {
@@ -376,7 +377,7 @@ body {
   font-size: 0.88rem;
   line-height: 1.5;
   color: var(--text-primary);
-  background: rgba(10, 15, 28, 0.85);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   resize: vertical;
@@ -385,8 +386,8 @@ body {
 }
 
 .code-textarea:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--color-allow);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
 
 .textarea-footer {
@@ -409,18 +410,19 @@ body {
   font-size: 0.95rem;
   font-weight: 600;
   color: #ffffff;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #10B981, #059669);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
   transition: all 0.2s ease;
   width: 100%;
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #059669, #047857);
 }
 
 .btn-primary:active {
@@ -530,8 +532,8 @@ body {
 .finding-card {
   padding: 12px 14px;
   border-radius: var(--radius-md);
-  background: rgba(10, 15, 28, 0.6);
-  border-left: 4px solid var(--accent-blue);
+  background: var(--bg-secondary);
+  border-left: 4px solid var(--accent-primary);
   border-top: 1px solid var(--border-subtle);
   border-right: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
@@ -540,7 +542,7 @@ body {
 .finding-card.CRITICAL { border-left-color: var(--color-block); }
 .finding-card.HIGH { border-left-color: #f97316; }
 .finding-card.MEDIUM { border-left-color: var(--color-sanitize); }
-.finding-card.LOW { border-left-color: var(--accent-blue); }
+.finding-card.LOW { border-left-color: var(--color-allow); }
 
 .finding-top {
   display: flex;
@@ -790,7 +792,7 @@ body {
 }
 
 .data-table th {
-  background: rgba(15, 23, 42, 0.95);
+  background: var(--bg-secondary);
   padding: 12px 16px;
   font-size: 0.74rem;
   font-weight: 700;
@@ -816,9 +818,10 @@ body {
   font-family: var(--font-mono);
   font-size: 0.78rem;
   padding: 2px 6px;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  color: #38bdf8;
+  color: #34d399;
 }
 
 /* Modals */
