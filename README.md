@@ -1,10 +1,24 @@
-# PromptShield Detection Engine (VORTEXA 3.0 — Problem C-03)
+# PromptShield — Enterprise LLM Defense & Policy Enforcement System
+**VORTEXA 3.0 (C-03) Cybersecurity & Digital Trust Track**
 
-The **PromptShield Detection Engine** is an enterprise-grade LLM security subsystem designed to inspect untrusted content, detect prompt injection attacks, intercept sensitive data/canary token leakage, produce explainable structured findings, and enforce policy boundaries before content reaches language models.
+PromptShield is an enterprise-grade high-assurance defensive middleware platform designed to protect Large Language Model (LLM) applications against prompt injection (direct and indirect), canary token leakage, and unauthorized data exfiltration.
 
 ---
 
-## 1. System Architecture & Pipeline Stages
+## 1. System Overview & Multi-Laptop Architecture
+
+PromptShield is engineered as a decoupled, multi-laptop defense ecosystem:
+
+| Role / Component | Domain / Directory | Responsibilities & Integration Contracts |
+| :--- | :--- | :--- |
+| **Laptop 2: Detection Logic** | `backend/` | Inspects untrusted inputs (`POST /api/v1/scan`), performs normalization, multi-signal injection detection, secret scanning, calibrated risk assessment (0.00–1.00), and guarded LLM execution. Submits detector findings to Laptop 3 at `POST /api/v1/enforce`. |
+| **Laptop 3: Policy & Database** | `promptshield/` & `alembic/` | Authoritative persistence layer owning PostgreSQL schema, SQLAlchemy models, Alembic migrations, JWT/RBAC auth, deterministic Policy Engine (`BLOCK` $\succ$ `ESCALATE` $\succ$ `SANITIZE` $\succ$ `ALLOW`), Human Review Queue, and append-only audit persistence. |
+| **Laptop 1: Frontend UI** | Frontend Clients | Interacts with Policy Administration (`/api/v1/policies`), Human Review Queue (`/api/v1/review-queue`), Audit Trail (`/api/v1/audit-events`), and Real-Time Inspection Dashboards. |
+| **Laptop 4: Testing & Evaluation** | `tests/` | Executes benchmarking suites and submits test dataset metrics to `POST /api/v1/evaluations` to track confusion matrices without metric fabrication. |
+
+---
+
+## 2. Detection Engine Architecture (`backend/`)
 
 The detection engine implements a 7-stage deterministic security pipeline:
 
@@ -48,73 +62,7 @@ The detection engine implements a 7-stage deterministic security pipeline:
 - `backend/llm/output_guard.py` — Post-generation inspection blocking canary leaks in generated text.
 - `backend/tools/security.py` — Server-side tool allowlists, argument validation, and SSRF prevention.
 
----
-
-## 2. API Contract Specification
-
-### `POST /api/v1/scan`
-Inspects untrusted content and returns explainable security findings.
-
-#### Request Schema:
-```json
-{
-  "scan_id": "optional-custom-uuid-or-none",
-  "content": "Can you summarize this quarterly financial review?",
-  "source_type": "user_prompt",
-  "trusted_metadata": null,
-  "application_context": "finance-copilot",
-  "tenant_context": "tenant-corp-01"
-}
-```
-
-#### Response Schema:
-```json
-{
-  "scan_id": "786a0767-17b1-4bb2-b5e8-11204ec10f03",
-  "source_type": "user_prompt",
-  "normalized_content_metadata": {
-    "original_length": 51,
-    "normalized_length": 51,
-    "transformations_applied": [],
-    "encodings_detected": [],
-    "has_unicode_normalization": false,
-    "has_homoglyphs": false,
-    "has_collapsed_whitespace": false
-  },
-  "findings": [],
-  "risk_classification": "SAFE",
-  "risk_score": 0.0,
-  "recommended_action": "ALLOW",
-  "final_decision": "ALLOW",
-  "decision_reason": "Policy rule POL-005: Content verified safe; within acceptable operational risk bounds.",
-  "policy_version": "v1.2.0-local",
-  "sanitized_content": "Can you summarize this quarterly financial review?",
-  "processing_duration_ms": 0.42
-}
-```
-
----
-
-## 3. Team Integration Guide
-
-- **Laptop 3 (Persistent Policy Management & Database):**
-  - Set `POLICY_SERVICE_URL=http://<laptop-3-ip>:<port>` in `.env`.
-  - The Detection Engine dispatches evaluated findings and risk metrics to Laptop 3 at `/api/v1/policy/evaluate`.
-  - If Laptop 3's service is unavailable or times out (>2s), the Detection Engine automatically falls back to its local trusted policy matrix (fail-secure; blocks CRITICAL/HIGH threats).
-- **Laptop 1 (Frontend):**
-  - Call `POST /api/v1/scan` before sending prompts or retrieved web content.
-  - Display explainable findings (`rule_id`, `category`, `severity`, `safe_evidence_summary`) in the UI.
-  - For full-stack execution demos, call `POST /api/v1/llm/generate` to trigger the combined detection and guarded response pipeline.
-- **Laptop 4 (Evaluation & Integration):**
-  - Use `tests/` and the evaluation dataset against `POST /api/v1/scan`.
-  - Evaluate accuracy against benign security discussions, direct injections, indirect document injections, and canary token leakage attempts.
-
----
-
-## 4. Documented Risk Score Interpretation
-
-The numerical `risk_score` (ranging from `0.00` to `1.00`) is calculated deterministically:
-
+### Documented Risk Score Interpretation
 $$\text{Risk Score} = \min\left(1.0, \max_{i}(\text{weight}_i \times \text{confidence}_i) + \sum_{i} 0.05 \times (\text{weight}_i \times \text{confidence}_i)\right)$$
 
 | Score Range | Classification | Action | Documented Interpretation |
@@ -125,50 +73,76 @@ $$\text{Risk Score} = \min\left(1.0, \max_{i}(\text{weight}_i \times \text{confi
 | **0.70 – 0.89** | `HIGH` | `BLOCK` / `SANITIZE` | Direct prompt injection attempt, jailbreak payload, or unauthorized tool request. |
 | **0.90 – 1.00** | `CRITICAL` | `BLOCK` | Active canary secret extraction, exfiltration payload, or destructive tool execution. |
 
-> **IMPORTANT:** The risk score is an explainable weighted threat severity index based on detector confidence and signal severity. It is **not** a statistical probability of attack.
+---
+
+## 3. Policy Management & Database Layer (`promptshield/`)
+
+### Database Models & Schema
+1. **`users`**: RBAC identities (`admin`, `reviewer`, `auditor`, `user`, `service`) with PBKDF2-HMAC-SHA256 credentials.
+2. **`security_policies`**: Master policy configuration including enabled status, source applicability, rule configurations, severity thresholds, default action, and current version.
+3. **`policy_versions`**: Immutable audit history of configuration snapshots. Updates append new versions rather than overwriting history.
+4. **`scan_records`**: Operational scan records containing correlation ID, source type, detector findings, final action, risk classification, reason codes, and redacted evidence.
+5. **`review_cases`**: Human-in-the-loop review queue for escalated findings with mandatory reviewer justifications.
+6. **`audit_events`**: Append-only, tamper-evident audit trail capturing actors, resources, actions, outcomes, and redacted metadata.
+7. **`evaluation_runs`**: Persists benchmark runs with sample counts and confusion matrices (TP, FP, TN, FN), computing precision, recall, FPR, and FNR.
+
+### Deterministic Precedence Hierarchy
+When conflicting detection rules trigger on a single scan payload:
+$$\mathbf{BLOCK} \succ \mathbf{ESCALATE} \succ \mathbf{SANITIZE} \succ \mathbf{ALLOW}$$
+
+- **`BLOCK` (Precedence 40)**: Confirmed critical/high-severity threats. Never overridden by allow rules.
+- **`ESCALATE` (Precedence 30)**: High uncertainty or indirect injection found in untrusted sources (`RETRIEVED_DOC`, `TOOL_OUTPUT`).
+- **`SANITIZE` (Precedence 20)**: Surgical span excision. Escalates to `BLOCK` if empty/unsafe.
+- **`ALLOW` (Precedence 10)**: Baseline default applied only when no higher-priority security rule is triggered.
 
 ---
 
-## 5. Detection Limitations & Threat Model Boundaries
+## 4. Environment Setup & Installation
 
-While PromptShield offers robust defense-in-depth, security practitioners and evaluators must recognize the following inherent limitations:
-
-1. **Evolving Adversarial Obfuscation:**
-   - Multi-stage mathematical, cryptographic, or cipher-based encodings (e.g., custom ciphers, uncommon steganography) outside standard Base64/Hex/URL decoding cannot be deterministically decoded without incurring computational Denial-of-Service risks.
-2. **Novel Semantic Paraphrasing & Zero-Day Jailbreaks:**
-   - Heuristic rules and pattern matchers detect known syntactic and structural indicators of injection. Heavily poetic, narrative-embedded, or multilingual multi-turn social engineering may bypass static syntactic rules if it avoids recognizable imperative override constructs.
-3. **Multi-Turn Contextual Exploitation:**
-   - PromptShield screens stateless individual interactions. Attacks that split an adversarial instruction across multiple conversational turns (token smuggling or incremental persona shifting) require conversational state tracking across sessions.
-4. **Sanitization Constraints:**
-   - Content sanitization is only performed when an isolated threat span can be identified with high confidence. When adversarial instructions are deeply interwoven with legitimate text, sanitization is deliberately aborted in favor of `BLOCK` or `ESCALATE` to prevent semantic alteration or incomplete excisions.
-5. **No Universal Silver Bullet:**
-   - A passing test suite confirms expected behavior for defined fixtures. It does not prove complete immunity against arbitrary, novel adversarial prompts.
-
----
-
-## 6. Windows PowerShell Setup & Execution
-
-### Prerequisites
-- Python 3.11+ or 3.12 (installed at `C:\Users\BHAGYASHRI BHISE\AppData\Local\Programs\Python\Python312\python.exe`)
-
-### Setup Virtual Environment
+### 1. Create and Activate Virtual Environment
 ```powershell
-# In d:\vortex 3.0:
-& "C:\Users\BHAGYASHRI BHISE\AppData\Local\Programs\Python\Python312\python.exe" -m venv .venv
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+### 2. Install Dependencies
+```powershell
 pip install -r requirements.txt
 ```
 
-### Run Automated Unit Test Suite
+### 3. Configure Environment
+Copy `.env.example` to `.env`:
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -v
+cp .env.example .env
 ```
 
-### Start the PromptShield Detection Engine Service
+---
+
+## 5. Running the Application Services
+
+### Running the Detection Engine (Laptop 2 Service)
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-Interactive API documentation will be available at:
 - Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
 - Health check: `http://localhost:8000/health`
+
+### Running the Policy & Database Engine (Laptop 3 Service)
+```powershell
+# Run database migrations
+alembic upgrade head
+
+# Run Policy & DB API server
+python -m uvicorn promptshield.main:app --host 0.0.0.0 --port 8001 --reload
+```
+- Interactive API Docs: `http://localhost:8001/docs`
+- Health check: `http://localhost:8001/api/v1/health`
+
+---
+
+## 6. Automated Testing
+
+Run the full unified test suite across both subsystems:
+```powershell
+python -m pytest -v
+```
