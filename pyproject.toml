@@ -1,0 +1,7 @@
+[project]
+name = "promptshield"
+version = "1.0.0"
+description = "PromptShield AI Security & Data Protection Platform"
+
+[tool.vercel]
+entrypoint = "backend.main:app"
