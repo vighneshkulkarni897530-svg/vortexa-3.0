@@ -61,7 +61,7 @@ def seed_default_data(db: Session) -> None:
         active_policy = db.query(SecurityPolicy).filter(SecurityPolicy.is_enabled == True).first()
         if not active_policy:
             policy = SecurityPolicy(
-                name="Default PromptShield Production Policy",
+                name="Default LEAKLOCK AI Production Policy",
                 description="Comprehensive defensive policy protecting against prompt injection and data exfiltration",
                 is_enabled=True,
                 source_applicability=["USER_PROMPT", "SYSTEM_PROMPT", "RETRIEVED_DOC", "TOOL_OUTPUT"],

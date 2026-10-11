@@ -12,7 +12,7 @@ class Settings(BaseModel):
     """Runtime configuration settings."""
 
     # Service metadata
-    SERVICE_NAME: str = "PromptShield Detection Engine"
+    SERVICE_NAME: str = "LEAKLOCK AI Detection Engine"
     SERVICE_VERSION: str = "1.0.0"
     POLICY_VERSION: str = "v1.2.0"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")

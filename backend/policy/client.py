@@ -6,6 +6,7 @@ Never allows untrusted scanned text to alter or select the active policy.
 """
 
 import logging
+import time
 from dataclasses import dataclass
 from typing import List, Optional
 import httpx
@@ -31,7 +32,10 @@ class PolicyEvaluationResult:
 
 
 class PolicyClient:
-    """Client for coordinating with Laptop 3's persistent policy management service."""
+    """Client for coordinating with persistent policy management service."""
+
+    _last_failure_time: float = 0.0
+    _failure_cooldown: float = 15.0  # seconds
 
     def __init__(
         self,
@@ -52,8 +56,9 @@ class PolicyClient:
         tenant_context: Optional[str] = None,
     ) -> PolicyEvaluationResult:
         """Call trusted policy service or fall back to internal trusted policy matrix."""
-        # 1. Attempt remote policy call if configured
-        if self.service_url:
+        # 1. Attempt remote policy call if configured and circuit breaker allows
+        now = time.time()
+        if self.service_url and (now - PolicyClient._last_failure_time > PolicyClient._failure_cooldown):
             try:
                 source_type_map = {
                     SourceType.USER_PROMPT: "USER_PROMPT",
@@ -109,7 +114,8 @@ class PolicyClient:
                     else:
                         logger.warning(f"Remote policy service returned status {resp.status_code}; using fail-secure fallback")
             except Exception as e:
-                logger.warning(f"Remote policy service call failed ({e}); employing fail-secure local policy rules")
+                PolicyClient._last_failure_time = time.time()
+                logger.warning(f"Remote policy service call failed ({e}); employing fail-secure local policy rules (circuit open for {PolicyClient._failure_cooldown}s)")
 
         # 2. Local trusted policy matrix (Deterministic fail-secure enforcement)
         return self._local_trusted_policy(

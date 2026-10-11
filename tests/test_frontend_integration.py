@@ -36,7 +36,7 @@ def test_frontend_dashboard_loads_assets_and_metrics(detection_client, client):
     # 1. HTML Shell
     html_resp = detection_client.get("/")
     assert html_resp.status_code == 200
-    assert "PromptShield" in html_resp.text
+    assert "LEAKLOCK AI" in html_resp.text
     assert 'id="tab-btn-workbench"' in html_resp.text
     assert 'id="tab-btn-benchmark"' in html_resp.text
 

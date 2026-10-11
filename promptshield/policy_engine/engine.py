@@ -126,6 +126,12 @@ class PolicyEngine:
                     if finding_action == "ALLOW":
                         finding_action = "ESCALATE"
                         reason_codes.append(f"UNTRUSTED_SOURCE_{source_type.upper()}_ELEVATED_TO_ESCALATE")
+                # When no custom rule overrode it, check if detector recommended surgical sanitization on isolated spans
+                if not matched_rule_name:
+                    details = getattr(finding, "details", None) or {}
+                    if isinstance(details, dict) and details.get("recommended_action") == "SANITIZE" and finding.matched_spans:
+                        finding_action = "SANITIZE"
+                        matched_rule_name = "Isolated Passive Carrier Sanitization"
 
             # Collect spans if sanitization is flagged
             if finding_action == "SANITIZE" and finding.matched_spans:
@@ -164,9 +170,8 @@ class PolicyEngine:
                 else:
                     reason_codes.append("CONTENT_SURGICALLY_SANITIZED")
             else:
-                # Sanitization requested but no candidate payload provided to excise
-                current_action = "BLOCK"
-                reason_codes.append("NO_PAYLOAD_PROVIDED_FOR_SANITIZATION_ESCALATED_TO_BLOCK")
+                # Sanitization authorized by policy; text redaction managed by upstream caller
+                reason_codes.append("POLICY_AUTHORIZES_SURGICAL_SANITIZATION")
 
         return PolicyEvaluationResult(
             action=current_action,
