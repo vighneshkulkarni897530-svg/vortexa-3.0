@@ -615,4 +615,12 @@ if os.path.exists(_frontend_dir):
     async def serve_js():
         return FileResponse(os.path.join(_frontend_dir, "app.js"))
 
+    @app.get("/logo.png", include_in_schema=False)
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def serve_logo():
+        logo_path = os.path.join(_frontend_dir, "logo.png")
+        if os.path.exists(logo_path):
+            return FileResponse(logo_path, media_type="image/png")
+        return Response(status_code=404)
+
 

@@ -28,12 +28,24 @@
       "dest": "backend/main.py"
     },
     {
+      "src": "/logo.png",
+      "dest": "/public/logo.png"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/public/logo.png"
+    },
+    {
       "src": "/styles.css",
       "dest": "/public/styles.css"
     },
     {
       "src": "/app.js",
       "dest": "/public/app.js"
+    },
+    {
+      "src": "/(.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2|ttf|eot))",
+      "dest": "/public/$1"
     },
     {
       "src": "/(.*)",

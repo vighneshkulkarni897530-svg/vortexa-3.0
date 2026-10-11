@@ -51,7 +51,13 @@ def test_frontend_dashboard_loads_assets_and_metrics(detection_client, client):
     assert css_resp.status_code == 200
     assert "--color-allow" in css_resp.text
 
-    # 4. Live Health Metrics
+    # 4. Logo Static Asset Serving
+    logo_resp = detection_client.get("/logo.png")
+    assert logo_resp.status_code == 200
+    assert logo_resp.headers["content-type"].startswith("image/png")
+    assert len(logo_resp.content) > 100000
+
+    # 5. Live Health Metrics
     health_det = detection_client.get("/health")
     assert health_det.status_code == 200
     assert health_det.json()["status"] in {"healthy", "online", "HEALTHY", "ONLINE"}
