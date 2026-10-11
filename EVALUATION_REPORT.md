@@ -1,6 +1,6 @@
 # PromptShield Benchmark Evaluation Report
 **VORTEXA 3.0 | Problem Statement C-03 (Cybersecurity & Digital Trust Track)**
-**Execution Timestamp:** 2026-10-11 07:12:43 UTC
+**Execution Timestamp:** 2026-10-11 07:37:35 UTC
 **Dataset:** `vortexa_c03_injection_benchmark` (Version: `1.0.0`)
 
 ---
@@ -103,11 +103,11 @@ For content originating from passive documents and webpages containing isolated 
 
 ## 8. Latency & Performance Observations
 
-- **Minimum Processing Latency:** `0.07 ms`
+- **Minimum Processing Latency:** `0.09 ms`
 - **Average Processing Latency:** `0.39 ms`
-- **95th Percentile (P95) Latency:** `0.54 ms`
-- **Maximum Processing Latency:** `8.74 ms`
-- **Total Suite Execution Time:** `24.53 ms`
+- **95th Percentile (P95) Latency:** `0.81 ms`
+- **Maximum Processing Latency:** `6.21 ms`
+- **Total Suite Execution Time:** `24.35 ms`
 
 PromptShield operates comfortably sub-millisecond on standard CPU hardware without GPU acceleration, fulfilling the problem statement's requirement that no paid API or specialized hardware is required.
 
