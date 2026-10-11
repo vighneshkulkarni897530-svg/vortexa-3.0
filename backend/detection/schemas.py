@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class SourceType(str, Enum):
@@ -113,3 +113,18 @@ class ScanResponse(BaseModel):
     policy_version: str = Field(..., description="Active policy version identifier")
     sanitized_content: Optional[str] = Field(None, description="Sanitized content when action is SANITIZE or ALLOW")
     processing_duration_ms: float = Field(..., ge=0.0, description="Total inspection duration in milliseconds")
+
+    # Contract parity fields (VORTEXA 3.0 Shared API Contract)
+    action: Optional[DecisionAction] = Field(None, description="Contract action (ALLOW, BLOCK, SANITIZE, ESCALATE)")
+    risk_level: Optional[str] = Field(None, description="Contract risk level (SAFE, LOW, MEDIUM, HIGH, CRITICAL)")
+    reason: Optional[str] = Field(None, description="Contract decision reason")
+
+    @model_validator(mode="after")
+    def populate_contract_fields(self) -> "ScanResponse":
+        if self.action is None and self.final_decision is not None:
+            self.action = self.final_decision
+        if self.risk_level is None and self.risk_classification is not None:
+            self.risk_level = self.risk_classification.value
+        if self.reason is None and self.decision_reason is not None:
+            self.reason = self.decision_reason
+        return self

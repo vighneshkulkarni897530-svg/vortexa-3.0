@@ -150,4 +150,7 @@ class DetectionEngineService:
             policy_version=policy_result.policy_version,
             sanitized_content=sanitized_content,
             processing_duration_ms=duration_ms,
+            action=policy_result.final_decision,
+            risk_level=risk_classification.value,
+            reason=policy_result.decision_reason,
         )

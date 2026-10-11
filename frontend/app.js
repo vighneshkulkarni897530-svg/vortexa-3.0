@@ -474,8 +474,8 @@ async function executeScanPrompt() {
 // Render Results to the Modern UI Panels
 function renderScanResultsToUI(data, elapsedMs) {
   const score = Math.round((data.risk_score || 0.0) * 100);
-  const action = data.final_decision || "ALLOW";
-  const classification = data.risk_classification || "SAFE";
+  const action = data.action || data.final_decision || "ALLOW";
+  const classification = data.risk_level || data.risk_classification || "SAFE";
 
   // Scan ID header
   const lblId = document.getElementById("lbl-scan-id");
@@ -505,7 +505,7 @@ function renderScanResultsToUI(data, elapsedMs) {
   if (title && explanation) {
     title.textContent = `${classification} RISK (${action})`;
     title.style.color = action === "ALLOW" ? "var(--color-allow)" : action === "SANITIZE" ? "var(--color-sanitize)" : "var(--color-block)";
-    explanation.textContent = data.decision_reason || "Deterministic policy rule applied to input signals.";
+    explanation.textContent = data.reason || data.decision_reason || "Deterministic policy rule applied to input signals.";
   }
 
   // Threat Classification Tags
@@ -618,10 +618,10 @@ function recordSecurityEvent(scan, rawContent) {
     source_type: scan.source_type,
     threat_category: (scan.findings && scan.findings[0]) ? scan.findings[0].category : "NONE",
     risk_score: Math.round((scan.risk_score || 0) * 100),
-    severity: scan.risk_classification || "SAFE",
+    severity: scan.risk_level || scan.risk_classification || "SAFE",
     detection_time: "Just now",
-    action_taken: scan.final_decision || "ALLOWED",
-    decision_reason: scan.decision_reason,
+    action_taken: scan.action || scan.final_decision || "ALLOWED",
+    decision_reason: scan.reason || scan.decision_reason,
     timestamp: new Date().toISOString()
   };
 
