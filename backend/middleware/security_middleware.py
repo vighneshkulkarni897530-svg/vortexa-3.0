@@ -20,6 +20,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         start_time = time.perf_counter()
         req_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        request.state.request_id = req_id
 
         # Pass through request
         response: Response = await call_next(request)

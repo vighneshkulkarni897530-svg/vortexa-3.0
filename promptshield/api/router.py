@@ -7,6 +7,7 @@ from promptshield.api.enforcement import router as enforce_router
 from promptshield.api.review_queue import router as review_router
 from promptshield.api.audit_events import router as audit_router
 from promptshield.api.evaluations import router as eval_router
+from promptshield.api.stats import router as stats_router
 
 api_router = APIRouter()
 
@@ -18,3 +19,4 @@ api_router.include_router(enforce_router)
 api_router.include_router(review_router)
 api_router.include_router(audit_router)
 api_router.include_router(eval_router)
+api_router.include_router(stats_router)

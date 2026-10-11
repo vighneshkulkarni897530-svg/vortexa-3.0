@@ -41,6 +41,9 @@ class Settings(BaseModel):
             "CANARY_VORTEXA_SEC_7749",
             "VRTX-TEST-SECRET-XYZ-99",
             "SYNTHETIC-CANARY-TOKEN-42",
+            "SYNTHETIC_API_KEY_123",
+            "TEST_CUSTOMER_RECORD_456",
+            "CONFIDENTIAL_DEMO_TOKEN_789",
         ]
     )
     CONFIGURED_SENSITIVE_KEYS: List[str] = Field(
@@ -70,6 +73,17 @@ class Settings(BaseModel):
             "filesystem_write",
             "raw_sql",
         }
+    )
+    # Web Page Retrieval settings (Anti-SSRF & extraction limits)
+    MAX_WEB_RETRIEVAL_BYTES: int = int(os.getenv("MAX_WEB_RETRIEVAL_BYTES", "2097152"))  # 2MB response limit
+    WEB_RETRIEVAL_TIMEOUT_SECONDS: float = float(os.getenv("WEB_RETRIEVAL_TIMEOUT_SECONDS", "5.0"))
+    MAX_REDIRECTS: int = 3
+    ALLOW_EXTERNAL_RETRIEVAL: bool = os.getenv("ALLOW_EXTERNAL_RETRIEVAL", "true").lower() == "true"
+
+    # Document Parsing settings
+    MAX_DOCUMENT_SIZE_BYTES: int = int(os.getenv("MAX_DOCUMENT_SIZE_BYTES", "10485760"))  # 10MB file limit
+    ALLOWED_DOCUMENT_EXTENSIONS: Set[str] = Field(
+        default_factory=lambda: {".txt", ".md", ".csv", ".json", ".pdf", ".docx"}
     )
 
 

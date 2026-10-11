@@ -85,18 +85,33 @@ class NormalizedContentMetadata(BaseModel):
 class ScanRequest(BaseModel):
     """Input payload for content security scanning."""
     scan_id: Optional[str] = Field(None, description="Optional scan identifier provided by caller")
-    content: str = Field(..., min_length=1, description="Raw untrusted content to inspect")
+    content: Optional[str] = Field(None, description="Raw untrusted content to inspect")
     source_type: SourceType = Field(..., description="Origin of the content")
+    url: Optional[str] = Field(None, description="Webpage URL for retrieved_webpage scanning")
+    tool_name: Optional[str] = Field(None, description="Optional tool name for tool_output scanning")
     trusted_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Server-validated metadata")
+    trusted_context: Optional[str] = Field(default=None, description="Optional trusted developer instructions")
+    protected_values: Optional[List[str]] = Field(default=None, description="Optional synthetic protected values to test")
+    destination: Optional[str] = Field(default=None, description="Optional target destination for simulated transfer checks")
     application_context: Optional[str] = Field(default=None, description="Target application name or ID")
     tenant_context: Optional[str] = Field(default=None, description="Tenant identifier for multi-tenant isolation")
 
     @field_validator("content")
     @classmethod
-    def validate_content_not_empty(cls, v: str) -> str:
-        if v is None or not v.strip():
+    def validate_content_not_empty(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not v.strip():
             raise ValueError("Content cannot be empty or whitespace only")
         return v
+
+    @model_validator(mode="after")
+    def validate_content_or_url_present(self) -> "ScanRequest":
+        if self.source_type == SourceType.RETRIEVED_WEBPAGE:
+            if not self.url and not (self.content and self.content.strip()):
+                raise ValueError("Either 'url' or 'content' must be provided for retrieved_webpage scanning")
+        else:
+            if not self.content or not self.content.strip():
+                raise ValueError("Content cannot be empty or whitespace only")
+        return self
 
 
 class ScanResponse(BaseModel):

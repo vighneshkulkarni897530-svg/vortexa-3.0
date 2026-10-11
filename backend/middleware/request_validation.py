@@ -18,14 +18,21 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Check Content-Length header against max payload bytes
         content_length = request.headers.get("content-length")
+        content_type = request.headers.get("content-type", "")
+        is_multipart = content_type.startswith("multipart/form-data")
+        max_bytes = (
+            settings.MAX_DOCUMENT_SIZE_BYTES + 65536
+            if "/scan/document" in request.url.path
+            else settings.MAX_SCAN_PAYLOAD_BYTES
+        )
         if content_length:
             try:
-                if int(content_length) > settings.MAX_SCAN_PAYLOAD_BYTES:
+                if int(content_length) > max_bytes:
                     return JSONResponse(
                         status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                         content={
                             "error": "PAYLOAD_TOO_LARGE",
-                            "message": f"Payload size exceeds maximum limit of {settings.MAX_SCAN_PAYLOAD_BYTES} bytes",
+                            "message": f"Payload size exceeds maximum limit of {max_bytes} bytes",
                         },
                     )
             except ValueError:
@@ -34,8 +41,8 @@ class RequestValidationMiddleware(BaseHTTPMiddleware):
                     content={"error": "INVALID_CONTENT_LENGTH", "message": "Malformed Content-Length header"},
                 )
 
-        # For POST requests, inspect body for raw binary/null byte anomalies
-        if request.method == "POST" and request.url.path.startswith("/api/"):
+        # For POST requests, inspect body for raw binary/null byte anomalies (excluding multipart file uploads)
+        if request.method == "POST" and request.url.path.startswith("/api/") and not is_multipart:
             try:
                 body = await request.body()
                 # Ensure body is valid UTF-8

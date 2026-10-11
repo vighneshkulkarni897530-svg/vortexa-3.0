@@ -24,6 +24,10 @@ async def lifespan(app: FastAPI):
     try:
         create_all_tables()
         logger.info("PromptShield schema initialization completed successfully.")
+        from promptshield.db.session import SessionLocal
+        from promptshield.db.seed import seed_default_data
+        with SessionLocal() as db:
+            seed_default_data(db)
     except Exception as e:
         logger.error(f"Failed to auto-initialize schemas: {e}")
     yield
@@ -83,6 +87,15 @@ def create_app() -> FastAPI:
 
     # Mount API v1 router
     app.include_router(api_router, prefix=settings.API_V1_STR)
+
+    @app.get("/health", include_in_schema=False)
+    async def root_health():
+        return {
+            "status": "UP",
+            "service": settings.PROJECT_NAME,
+            "version": settings.VERSION,
+            "environment": settings.ENVIRONMENT,
+        }
 
     return app
 

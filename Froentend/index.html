@@ -7,7 +7,7 @@
   <meta name="description" content="Secure Every Prompt. Protect Every Byte. Enterprise cybersecurity platform detecting prompt injection attacks and preventing data leakage.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <!-- Chart.js for Interactive Security Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -21,14 +21,22 @@
         <div class="sidebar-header">
           <a href="#" class="brand-badge" onclick="navigateTo('overview'); return false;">
             <div class="brand-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="m9 12 2 2 4-4"/>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <defs>
+                  <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00D2FF"/>
+                    <stop offset="50%" stop-color="#2563EB"/>
+                    <stop offset="100%" stop-color="#1D4ED8"/>
+                  </linearGradient>
+                </defs>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="url(#shieldGrad)" stroke="#60A5FA" stroke-width="1.2"/>
+                <path d="M12 4.5l5.5 2.2v4.8c0 4.2-5.5 7.5-5.5 7.5s-5.5-3.3-5.5-7.5V6.7L12 4.5z" fill="rgba(255,255,255,0.25)"/>
+                <path d="m9.5 12 1.8 1.8 3.5-3.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
             <div class="brand-text">
               <span class="brand-title">PromptShield</span>
-              <span class="brand-tagline">Secure Every Prompt. Protect Every Byte.</span>
+              <span class="brand-tagline">Secure Every Prompt. Protect AI.</span>
             </div>
           </a>
           <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
@@ -88,13 +96,13 @@
           </a>
         </nav>
       </div>
-
       <div class="sidebar-footer">
         <div class="user-profile-badge">
-          <div class="user-avatar">SE</div>
+          <div class="user-avatar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
           <div class="user-info">
             <span class="user-name">SecOps Engineer</span>
-            <span class="user-role">Administrator</span>
           </div>
         </div>
         <div class="system-status-indicator" id="lbl-system-indicator" title="Live status of Laptop 2 and Laptop 3 services">
@@ -119,6 +127,11 @@
         </div>
 
         <div class="top-nav-actions">
+          <div class="env-mode-badge demo" id="env-mode-badge" onclick="toggleEnvMode()" title="Click to toggle between DEMO and LIVE mode">
+            <span class="env-mode-dot"></span>
+            <span id="lbl-env-mode">DEMO MODE</span>
+          </div>
+
           <div class="search-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="text" id="global-search-input" placeholder="Search prompts, threats, rules..." oninput="handleGlobalSearch(this.value)">
@@ -131,7 +144,11 @@
           </button>
 
           <button class="nav-icon-btn" onclick="navigateTo('settings')" title="System Settings">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+
+          <button class="nav-icon-btn profile-nav-btn" onclick="navigateTo('settings')" title="User Account">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </button>
         </div>
       </header>
@@ -143,103 +160,253 @@
         <section id="view-overview" class="tab-content active">
           <!-- Command Hero -->
           <div class="command-hero">
-            <div class="command-hero-title">
-              <h2>AI Security Command Center</h2>
-              <p>Monitor threats, inspect prompts, and protect sensitive information in real time.</p>
+            <div class="command-hero-left">
+              <div class="hero-shield-icon-box">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="url(#shieldGrad)" stroke="#60A5FA" stroke-width="1.2"/>
+                  <path d="M12 4.5l5.5 2.2v4.8c0 4.2-5.5 7.5-5.5 7.5s-5.5-3.3-5.5-7.5V6.7L12 4.5z" fill="rgba(255,255,255,0.25)"/>
+                  <path d="m9.5 12 1.8 1.8 3.5-3.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="command-hero-title">
+                <h2>AI Security Command Center</h2>
+                <p>Monitor threats, inspect prompts, and protect sensitive information in real-time.</p>
+              </div>
             </div>
-            <div class="command-hero-actions">
-              <button class="btn-primary" onclick="navigateTo('scanner')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                Scan a Prompt
-              </button>
-              <button class="btn-secondary" onclick="navigateTo('simulator')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                Run Attack Simulation
-              </button>
+            <div class="command-hero-right">
+              <div class="command-hero-actions">
+                <button class="btn-primary" onclick="navigateTo('scanner')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  Scan a Prompt
+                </button>
+                <button class="btn-secondary" onclick="navigateTo('simulator')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Run Attack Simulation
+                </button>
+              </div>
+              <!-- 3D Holographic Orbit Planet -->
+              <div class="holographic-planet" title="PromptShield Orbital Defense">
+                <svg width="78" height="78" viewBox="0 0 100 100" fill="none">
+                  <defs>
+                    <radialGradient id="planetGrad" cx="35%" cy="30%" r="65%">
+                      <stop offset="0%" stop-color="#A5F3FC"/>
+                      <stop offset="25%" stop-color="#38BDF8"/>
+                      <stop offset="60%" stop-color="#6366F1"/>
+                      <stop offset="90%" stop-color="#4338CA"/>
+                      <stop offset="100%" stop-color="#1E1B4B"/>
+                    </radialGradient>
+                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#C084FC" stop-opacity="0.95"/>
+                      <stop offset="40%" stop-color="#67E8F9" stop-opacity="0.95"/>
+                      <stop offset="80%" stop-color="#A855F7" stop-opacity="0.7"/>
+                      <stop offset="100%" stop-color="#E879F9" stop-opacity="0.3"/>
+                    </linearGradient>
+                    <filter id="planetGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                  </defs>
+                  <ellipse cx="50" cy="50" rx="42" ry="14" transform="rotate(-25 50 50)" stroke="url(#ringGrad)" stroke-width="4.5" fill="none" opacity="0.75"/>
+                  <circle cx="50" cy="50" r="26" fill="url(#planetGrad)" filter="url(#planetGlow)"/>
+                  <ellipse cx="42" cy="40" rx="10" ry="6" transform="rotate(-30 42 40)" fill="white" opacity="0.45"/>
+                  <path d="M 12,65 A 42 14 0 0 0 88,35" transform="rotate(-25 50 50)" stroke="url(#ringGrad)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+                </svg>
+              </div>
             </div>
           </div>
 
-          <!-- Key Metrics Cards -->
+          <!-- Key Metrics Cards (Row of 4) -->
           <div class="kpi-grid-4">
+            <!-- Card 1: TOTAL PROMPTS SCANNED -->
             <div class="metric-card">
               <div class="metric-header">
-                <span class="metric-label">Total Prompts Scanned</span>
-                <div class="metric-icon-box">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <div class="metric-icon-box pulse-icon-box">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <span class="metric-label">TOTAL PROMPTS SCANNED</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-val" id="metric-total-scanned">1,482</div>
+                <div class="metric-sparkline">
+                  <svg width="86" height="32" viewBox="0 0 86 32" fill="none">
+                    <defs>
+                      <linearGradient id="spark1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M 0,22 Q 22,26 44,14 T 86,6 L 86,32 L 0,32 Z" fill="url(#spark1)"/>
+                    <path d="M 0,22 Q 22,26 44,14 T 86,6" stroke="#06B6D4" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
                 </div>
               </div>
-              <div class="metric-val" id="metric-total-scanned">1,482</div>
               <div class="metric-footer">
                 <span class="metric-trend trend-up">↑ +14.2%</span>
-                <span class="metric-subtext">vs previous 7 days</span>
+                <span class="metric-subtext">vs. previous 7 days</span>
               </div>
             </div>
 
+            <!-- Card 2: THREATS INTERCEPTED -->
             <div class="metric-card">
               <div class="metric-header">
-                <span class="metric-label">Threats Intercepted</span>
-                <div class="metric-icon-box" style="background:rgba(255, 93, 115, 0.1); color:var(--color-block);">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div class="metric-icon-box shield-icon-box">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <span class="metric-label">THREATS INTERCEPTED</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-val" id="metric-threats-detected">487</div>
+                <div class="metric-sparkline">
+                  <svg width="86" height="32" viewBox="0 0 86 32" fill="none">
+                    <defs>
+                      <linearGradient id="spark2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#F43F5E" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#F43F5E" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M 0,22 Q 22,26 44,18 T 86,5 L 86,32 L 0,32 Z" fill="url(#spark2)"/>
+                    <path d="M 0,22 Q 22,26 44,18 T 86,5" stroke="#F43F5E" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
                 </div>
               </div>
-              <div class="metric-val" id="metric-threats-detected">487</div>
               <div class="metric-footer">
-                <span class="metric-trend trend-alert">↑ 32.8%</span>
-                <span class="metric-subtext">Direct & Indirect blocked</span>
+                <span class="metric-trend trend-alert">↓ +32.8%</span>
+                <span class="metric-subtext">Direct & indirect blocked</span>
               </div>
             </div>
 
+            <!-- Card 3: DATA LEAKS PREVENTED -->
             <div class="metric-card">
               <div class="metric-header">
-                <span class="metric-label">Data Leaks Prevented</span>
-                <div class="metric-icon-box" style="background:rgba(54, 211, 153, 0.1); color:var(--color-allow);">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <div class="metric-icon-box lock-icon-box">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <span class="metric-label">DATA LEAKS PREVENTED</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-val" id="metric-leaks-prevented">156</div>
+                <div class="metric-sparkline">
+                  <svg width="86" height="32" viewBox="0 0 86 32" fill="none">
+                    <defs>
+                      <linearGradient id="spark3" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#0EA5E9" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#0EA5E9" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M 0,24 Q 22,18 44,22 T 66,10 T 86,6 L 86,32 L 0,32 Z" fill="url(#spark3)"/>
+                    <path d="M 0,24 Q 22,18 44,22 T 66,10 T 86,6" stroke="#0EA5E9" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
                 </div>
               </div>
-              <div class="metric-val" id="metric-leaks-prevented">156</div>
               <div class="metric-footer">
                 <span class="metric-trend trend-up">100% Masked</span>
                 <span class="metric-subtext">Canary & API credentials</span>
               </div>
             </div>
 
+            <!-- Card 4: HIGH-RISK ESCALATIONS -->
             <div class="metric-card">
               <div class="metric-header">
-                <span class="metric-label">High-Risk Escalations</span>
-                <div class="metric-icon-box" style="background:rgba(139, 124, 255, 0.1); color:var(--color-escalate);">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <div class="metric-icon-box user-icon-box">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <span class="metric-label">HIGH-RISK ESCALATIONS</span>
+              </div>
+              <div class="metric-body-row">
+                <div class="metric-val" id="metric-high-risk">24</div>
+                <div class="metric-sparkline">
+                  <svg width="86" height="32" viewBox="0 0 86 32" fill="none">
+                    <defs>
+                      <linearGradient id="spark4" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M 0,24 Q 22,16 44,22 T 66,12 T 86,6 L 86,32 L 0,32 Z" fill="url(#spark4)"/>
+                    <path d="M 0,24 Q 22,16 44,22 T 66,12 T 86,6" stroke="#8B5CF6" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
                 </div>
               </div>
-              <div class="metric-val" id="metric-high-risk">24</div>
               <div class="metric-footer">
-                <span class="metric-trend">Human-in-Loop</span>
-                <span class="metric-subtext">Review Queue items</span>
+                <span class="metric-trend trend-escalate">Human-in-loop</span>
+                <span class="metric-subtext">Review Queue Items</span>
               </div>
             </div>
           </div>
 
           <!-- Threat Analytics Section -->
           <div class="analytics-grid">
-            <div class="glass-card">
+            <div class="glass-card timeline-card">
               <div class="card-title-bar">
-                <h3 class="card-title">Threat Interception Timeline</h3>
+                <div class="card-title-group">
+                  <div class="card-title-icon chart-icon-box">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                  </div>
+                  <h3 class="card-title">Threat Interception Timeline</h3>
+                </div>
                 <div class="time-filter-group">
                   <button class="filter-btn active" onclick="updateChartTimeframe('24h', this)">24 Hours</button>
                   <button class="filter-btn" onclick="updateChartTimeframe('7d', this)">7 Days</button>
                   <button class="filter-btn" onclick="updateChartTimeframe('30d', this)">30 Days</button>
                 </div>
               </div>
+              <div class="timeline-legend-row">
+                <div class="legend-badge"><span class="legend-square safe-square"></span> Safe Prompts</div>
+                <div class="legend-badge"><span class="legend-square threat-square"></span> Threats Intercepted</div>
+              </div>
               <div class="chart-box">
                 <canvas id="timelineChart"></canvas>
               </div>
             </div>
 
-            <div class="glass-card">
+            <div class="glass-card breakdown-card">
               <div class="card-title-bar">
-                <h3 class="card-title">Threat Breakdown</h3>
+                <div class="card-title-group">
+                  <div class="card-title-icon donut-icon-box">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10h-10z"/></svg>
+                  </div>
+                  <h3 class="card-title">Threat Breakdown</h3>
+                </div>
+                <span style="font-size:0.72rem; font-weight:700; color:var(--accent-blue); background:#EFF6FF; border:1px solid #BFDBFE; padding:3px 10px; border-radius:9999px;">LIVE RADAR</span>
               </div>
-              <div class="chart-box">
-                <canvas id="categoryDonutChart"></canvas>
+              <div class="donut-chart-container">
+                <div class="chart-box donut-chart-box">
+                  <canvas id="categoryDonutChart"></canvas>
+                  <div class="donut-center-stat">
+                    <span class="donut-center-val" id="donut-center-val">487</span>
+                    <span class="donut-center-lbl">Total Threats</span>
+                  </div>
+                </div>
+                <div class="breakdown-list">
+                  <div class="breakdown-row">
+                    <div class="breakdown-label-group">
+                      <span class="breakdown-dot dot-override"></span>
+                      <span>Direct Prompt Override</span>
+                    </div>
+                    <span class="breakdown-pct">45.2%</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <div class="breakdown-label-group">
+                      <span class="breakdown-dot dot-leak"></span>
+                      <span>Canary / Secret Leak</span>
+                    </div>
+                    <span class="breakdown-pct">22.7%</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <div class="breakdown-label-group">
+                      <span class="breakdown-dot dot-obfuscation"></span>
+                      <span>Obfuscation & Homoglyphs</span>
+                    </div>
+                    <span class="breakdown-pct">18.4%</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <div class="breakdown-label-group">
+                      <span class="breakdown-dot dot-indirect"></span>
+                      <span>Indirect Injections</span>
+                    </div>
+                    <span class="breakdown-pct">13.7%</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -317,40 +484,201 @@
 
               <!-- Preset Sample Scenarios -->
               <div class="form-group" style="margin-bottom:12px;">
-                <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Load Test Scenario</label>
+                <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Load Test Scenario (SIH Problem Statement Scenarios 1–8)</label>
                 <div class="preset-bar">
-                  <span class="preset-chip attack" onclick="loadPreset('direct_override')">Direct Override</span>
-                  <span class="preset-chip attack" onclick="loadPreset('dan_jailbreak')">DAN Jailbreak</span>
-                  <span class="preset-chip attack" onclick="loadPreset('canary_leak')">Canary Secret Exfil</span>
-                  <span class="preset-chip attack" onclick="loadPreset('base64_obfuscation')">Base64 Payload</span>
-                  <span class="preset-chip attack" onclick="loadPreset('indirect_doc')">Indirect Doc Injection</span>
-                  <span class="preset-chip benign" onclick="loadPreset('benign_query')">Benign Python Code</span>
-                  <span class="preset-chip benign" onclick="loadPreset('benign_security')">Academic Discussion</span>
+                  <span class="preset-chip benign" onclick="loadPreset('scenario_1_benign')">1. Benign Query</span>
+                  <span class="preset-chip attack" onclick="loadPreset('scenario_2_override')">2. Direct Override</span>
+                  <span class="preset-chip attack" onclick="loadPreset('scenario_3_indirect')">3. Indirect Webpage</span>
+                  <span class="preset-chip attack" onclick="loadPreset('scenario_4_secret')">4. Reveal Secret</span>
+                  <span class="preset-chip attack" onclick="loadPreset('scenario_5_exfil')">5. Exfil Transfer</span>
+                  <span class="preset-chip benign" onclick="loadPreset('scenario_6_research')">6. Security Research</span>
+                  <span class="preset-chip attack" onclick="loadPreset('scenario_7_spaced')">7. Spaced Obfuscation</span>
+                  <span class="preset-chip benign" onclick="loadPreset('scenario_8_doc')">8. Password Doc (Benign)</span>
                 </div>
               </div>
 
-              <!-- Textarea Prompt Editor -->
-              <div class="textarea-wrapper">
-                <textarea 
-                  class="code-textarea" 
-                  id="prompt-input" 
-                  placeholder="Paste a prompt or suspicious instruction here..."
-                  oninput="handlePromptInput(this.value)"
-                ></textarea>
-                <div class="textarea-footer">
-                  <div class="editor-actions">
-                    <button class="btn-ghost-sm" onclick="clearPromptInput()">Clear</button>
-                    <button class="btn-ghost-sm" onclick="pasteFromClipboard()">Paste</button>
+              <!-- PANEL 1: User Prompt Workspace -->
+              <div class="source-input-panel active" id="panel-user_prompt">
+                <div class="textarea-wrapper">
+                  <textarea 
+                    class="code-textarea" 
+                    id="prompt-input" 
+                    placeholder="Paste a user prompt or conversational instruction here..."
+                    oninput="handlePromptInput(this.value)"
+                  ></textarea>
+                  <div class="textarea-footer">
+                    <div class="editor-actions">
+                      <button class="btn-ghost-sm" onclick="clearPromptInput()">Clear</button>
+                      <button class="btn-ghost-sm" onclick="pasteFromClipboard()">Paste</button>
+                    </div>
+                    <span id="char-token-counter">0 chars | ~0 tokens</span>
                   </div>
-                  <span id="char-token-counter">0 chars | ~0 tokens</span>
+                </div>
+              </div>
+
+              <!-- PANEL 2: Document Upload Workspace -->
+              <div class="source-input-panel" id="panel-uploaded_document">
+                <input type="file" id="doc-file-input" accept=".txt,.md,.csv,.json,.pdf,.docx" style="display:none;" onchange="handleDocumentFileSelected(this)">
+                
+                <div class="file-dropzone" id="doc-dropzone" onclick="document.getElementById('doc-file-input').click()">
+                  <div class="dropzone-icon">📄</div>
+                  <div class="dropzone-title">Upload Untrusted Document Carrier</div>
+                  <div class="dropzone-subtitle">Click to browse or drag & drop file for in-memory extraction</div>
+                  <div class="dropzone-badges">
+                    <span class="dropzone-badge">.TXT</span>
+                    <span class="dropzone-badge">.MD</span>
+                    <span class="dropzone-badge">.CSV</span>
+                    <span class="dropzone-badge">.JSON</span>
+                    <span class="dropzone-badge">.PDF</span>
+                    <span class="dropzone-badge">.DOCX</span>
+                    <span class="dropzone-badge" style="background:rgba(79,140,255,0.15); color:var(--accent-blue);">MAX 10MB</span>
+                  </div>
+                </div>
+
+                <div id="selected-doc-box" class="selected-file-info" style="display:none;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.1rem;">📎</span>
+                    <div>
+                      <strong id="selected-doc-name" style="color:var(--text-primary); font-family:var(--font-mono);">file.txt</strong>
+                      <span id="selected-doc-size" style="color:var(--text-muted); font-size:0.75rem; margin-left:6px;">(0 KB)</span>
+                    </div>
+                  </div>
+                  <button class="btn-ghost-sm" onclick="clearSelectedDocument(event)" style="color:var(--color-block);">Remove</button>
+                </div>
+
+                <div id="doc-dual-input-bar" style="display:none; margin-top:12px; padding:10px 14px; background:rgba(79,140,255,0.08); border:1px solid rgba(79,140,255,0.25); border-radius:8px; font-size:0.75rem; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:0.95rem;">📑</span>
+                    <span style="color:var(--text-primary); font-weight:600;">Both file & pasted text provided. Choose target:</span>
+                  </div>
+                  <div style="display:flex; gap:6px;">
+                    <button type="button" class="btn-ghost-sm" id="btn-docmode-both" onclick="setDocScanMode('both')" style="border:1px solid var(--accent-blue); color:var(--accent-blue); font-weight:700;">Scan Both</button>
+                    <button type="button" class="btn-ghost-sm" id="btn-docmode-file" onclick="setDocScanMode('file')" style="border:1px solid transparent; color:var(--text-muted);">File Only</button>
+                    <button type="button" class="btn-ghost-sm" id="btn-docmode-text" onclick="setDocScanMode('text')" style="border:1px solid transparent; color:var(--text-muted);">Text Only</button>
+                  </div>
+                </div>
+
+                <div style="margin-top:12px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <label style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Or Paste Document Text Directly:</label>
+                    <span id="doc-char-counter" style="font-size:0.72rem; color:var(--text-muted);">0 chars</span>
+                  </div>
+                  <textarea 
+                    class="code-textarea" 
+                    id="doc-manual-text" 
+                    style="height:120px;"
+                    placeholder="Paste unformatted document text or financial/technical excerpts here..."
+                    oninput="handleDocManualInput(this.value)"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- PANEL 3: Web Page URL Retrieval Workspace -->
+              <div class="source-input-panel" id="panel-retrieved_webpage">
+                <div class="url-input-container">
+                  <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;">Target Webpage URL</label>
+                  <div class="url-input-wrapper">
+                    <span class="url-protocol-badge">HTTP(S)</span>
+                    <input 
+                      type="url" 
+                      id="web-url-input" 
+                      class="url-text-input" 
+                      placeholder="https://example.com/blog/article.html"
+                      oninput="handleWebpageUrlInput(this.value)"
+                    />
+                    <button class="btn-ghost-sm" onclick="clearWebpageUrl()">Clear</button>
+                  </div>
+                  <div class="url-security-badges">
+                    <span class="url-badge">🛡️ Zero SSRF Guard Active</span>
+                    <span class="url-badge">🚫 RFC 1918 & Cloud Metadata Blocked</span>
+                    <span class="url-badge warning">⚡ In-Memory Text Extraction (No JS)</span>
+                  </div>
+                </div>
+
+                <div style="margin-top:12px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <label style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Or Paste Pre-Retrieved Web Content:</label>
+                    <span id="web-char-counter" style="font-size:0.72rem; color:var(--text-muted);">0 chars</span>
+                  </div>
+                  <textarea 
+                    class="code-textarea" 
+                    id="web-manual-text" 
+                    style="height:120px;"
+                    placeholder="Paste raw HTML or retrieved webpage text here..."
+                    oninput="handleWebManualInput(this.value)"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- PANEL 4: Tool Output Workspace -->
+              <div class="source-input-panel" id="panel-tool_output">
+                <div class="tool-context-bar">
+                  <div style="flex-grow:1;">
+                    <label style="display:block; font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Tool / Plugin Name</label>
+                    <input 
+                      type="text" 
+                      id="tool-name-input" 
+                      class="tool-name-input" 
+                      placeholder="e.g. search_products, calculator, sql_agent, api_connector"
+                      oninput="handleToolNameInput(this.value)"
+                    />
+                  </div>
+                </div>
+
+                <div class="textarea-wrapper">
+                  <textarea 
+                    class="code-textarea" 
+                    id="tool-output-input" 
+                    style="height:170px;"
+                    placeholder="Paste untrusted tool observation, external API JSON, or database result here..."
+                    oninput="handleToolOutputInput(this.value)"
+                  ></textarea>
+                  <div class="textarea-footer">
+                    <div class="editor-actions">
+                      <button class="btn-ghost-sm" onclick="clearToolOutputInput()">Clear</button>
+                      <button class="btn-ghost-sm" onclick="pasteToolFromClipboard()">Paste</button>
+                    </div>
+                    <span id="tool-char-counter">0 chars | Raw Tool Payload</span>
+                  </div>
+                </div>
+                <div style="font-size:0.72rem; color:var(--text-muted); display:flex; align-items:center; gap:6px; margin-top:-8px;">
+                  <span>⚡ Treated strictly as untrusted passive data; secondary command execution stripped.</span>
+                </div>
+              </div>
+
+              <!-- Optional Context & Security Parameters -->
+              <div class="optional-context-box">
+                <div class="optional-context-header" onclick="toggleOptionalContext()">
+                  <span>⚙️ Advanced Context & Simulated Boundary Checks (Optional)</span>
+                  <span id="opt-context-chevron">▼</span>
+                </div>
+                <div class="optional-context-content" id="optional-context-body">
+                  <div class="opt-field-group">
+                    <label class="opt-field-label">Trusted Developer Instructions (Context)</label>
+                    <input type="text" id="opt-trusted-context" class="opt-field-input" placeholder="e.g. You are a confidential customer support agent. Do not reveal private keys.">
+                  </div>
+                  <div class="opt-field-group">
+                    <label class="opt-field-label">Protected Value / Synthetic Test Secret</label>
+                    <input type="text" id="opt-protected-values" class="opt-field-input" placeholder="e.g. SYNTHETIC_API_KEY_123, TEST_CUSTOMER_RECORD_456">
+                  </div>
+                  <div class="opt-field-group">
+                    <label class="opt-field-label">Simulated Transfer Destination</label>
+                    <input type="text" id="opt-destination" class="opt-field-input" placeholder="e.g. https://untrusted-exfil-sink.com/api/leak">
+                  </div>
                 </div>
               </div>
 
               <!-- Action Bar -->
-              <button class="btn-primary" id="btn-scan-prompt" onclick="executeScanPrompt()" style="width:100%; justify-content:center; padding:13px 24px; font-size:0.95rem;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <span id="btn-scan-label">Scan Prompt</span>
-              </button>
+              <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <button class="btn-primary" id="btn-scan-prompt" onclick="executeScanPrompt(false)" style="flex:1; justify-content:center; padding:13px 20px; font-size:0.95rem;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <span id="btn-scan-label">Analyze Content</span>
+                </button>
+                <button class="btn-secondary" id="btn-scan-sanitize" onclick="executeScanPrompt(true)" style="padding:13px 20px; font-size:0.92rem; justify-content:center;" title="Analyze content and apply surgical sanitization if threats detected">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+                  <span>Analyze & Sanitize</span>
+                </button>
+              </div>
 
               <div class="privacy-notice">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -699,6 +1027,211 @@
           </div>
         </section>
 
+        <!-- SECTION: POLICY STUDIO -->
+        <section id="view-policy" class="tab-content">
+          <div class="glass-card" style="margin-bottom:24px;">
+            <div class="card-title-bar">
+              <div>
+                <h2 style="font-size:1.25rem; font-weight:700;">Authoritative Policy Studio</h2>
+                <p style="font-size:0.8rem; color:var(--text-muted);">Manage trusted security rules, action thresholds, and versioned policy snapshots.</p>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <button class="btn-secondary" style="font-size:0.8rem;" onclick="loadPolicyStudio()">Refresh Policies</button>
+              </div>
+            </div>
+
+            <div id="policy-studio-card" style="background:var(--bg-surface-elevated); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); margin-bottom:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                  <h3 id="display-policy-name" style="font-size:1.1rem; font-weight:700; color:var(--accent-cyan);">Default PromptShield Production Policy</h3>
+                  <p id="display-policy-desc" style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">Comprehensive defensive policy protecting against prompt injection and data exfiltration</p>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <span class="severity-pill SAFE" id="display-policy-status">ACTIVE</span>
+                  <span class="preset-chip" id="lbl-studio-version" style="font-family:var(--font-mono);">v1</span>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:20px;">
+                <div style="padding:12px; background:var(--bg-primary); border-radius:6px; border:1px solid var(--border-subtle);">
+                  <span style="font-size:0.72rem; color:var(--text-muted);">Default Action</span>
+                  <div id="display-default-action" style="font-size:1.1rem; font-weight:700; color:var(--color-allow);">ALLOW</div>
+                </div>
+                <div style="padding:12px; background:var(--bg-primary); border-radius:6px; border:1px solid var(--border-subtle);">
+                  <span style="font-size:0.72rem; color:var(--text-muted);">Critical Rule Action</span>
+                  <div style="font-size:1.1rem; font-weight:700; color:var(--color-block);">BLOCK</div>
+                </div>
+                <div style="padding:12px; background:var(--bg-primary); border-radius:6px; border:1px solid var(--border-subtle);">
+                  <span style="font-size:0.72rem; color:var(--text-muted);">High Rule Action</span>
+                  <div style="font-size:1.1rem; font-weight:700; color:var(--color-block);">BLOCK</div>
+                </div>
+                <div style="padding:12px; background:var(--bg-primary); border-radius:6px; border:1px solid var(--border-subtle);">
+                  <span style="font-size:0.72rem; color:var(--text-muted);">Medium Rule Action</span>
+                  <div style="font-size:1.1rem; font-weight:700; color:var(--color-sanitize);">ESCALATE</div>
+                </div>
+              </div>
+
+              <!-- Edit Policy Form -->
+              <div style="background:var(--bg-primary); padding:16px; border-radius:8px; border:1px solid var(--border-subtle);">
+                <h4 style="font-size:0.92rem; margin-bottom:12px; color:var(--text-primary);">Update Active Policy Thresholds</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px;">
+                  <div>
+                    <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px;">Policy Name</label>
+                    <input type="text" id="policy-name" class="code-textarea" style="height:38px; width:100%; padding:8px 12px; font-size:0.85rem;" value="Default PromptShield Production Policy">
+                  </div>
+                  <div>
+                    <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px;">Default Fallback Action</label>
+                    <select id="policy-default-action" class="code-textarea" style="height:38px; width:100%; padding:6px 12px; font-size:0.85rem; background:var(--bg-surface);">
+                      <option value="ALLOW" selected>ALLOW (Permissive baseline for clean prompts)</option>
+                      <option value="BLOCK">BLOCK (Strict zero-trust mode)</option>
+                      <option value="SANITIZE">SANITIZE (Sanitize by default)</option>
+                      <option value="ESCALATE">ESCALATE (Escalate all to human queue)</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="margin-bottom:14px;">
+                  <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px;">Change Summary (Mandatory audit log justification, min 5 chars)</label>
+                  <input type="text" id="policy-change-summary" class="code-textarea" style="height:38px; width:100%; padding:8px 12px; font-size:0.85rem;" placeholder="e.g. Updated threshold sensitivity and default action for production deployment">
+                </div>
+                <button class="btn-primary" id="btn-save-policy" style="padding:10px 22px; width:auto;" onclick="savePolicyChanges()">Save Policy Version</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: REVIEW QUEUE -->
+        <section id="view-review" class="tab-content">
+          <div class="glass-card">
+            <div class="card-title-bar">
+              <div>
+                <h2 style="font-size:1.25rem; font-weight:700;">Human-in-the-Loop Review Queue</h2>
+                <p style="font-size:0.8rem; color:var(--text-muted);">Inspect, evaluate, and resolve escalated ambiguous prompts before LLM dispatch.</p>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <select id="review-filter-status" class="code-textarea" style="height:36px; padding:4px 10px; font-size:0.8rem;" onchange="loadReviewQueue()">
+                  <option value="">All Statuses</option>
+                  <option value="PENDING" selected>Pending Review</option>
+                  <option value="IN_REVIEW">In Review</option>
+                  <option value="RESOLVED">Resolved</option>
+                </select>
+                <button class="btn-secondary" style="font-size:0.8rem;" onclick="loadReviewQueue()">Refresh Queue</button>
+              </div>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>Severity</th>
+                    <th>Reason / Findings</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Reviewer Decision</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-review-queue">
+                  <tr>
+                    <td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No pending escalation cases.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION: BENCHMARK & EVALUATION -->
+        <section id="view-benchmark" class="tab-content">
+          <div class="glass-card" style="margin-bottom:24px;">
+            <div class="card-title-bar">
+              <div>
+                <h2 style="font-size:1.25rem; font-weight:700;">Prompt Injection & Exfiltration Benchmark Suite</h2>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                  Live evaluation against 60 labelled benchmark samples (Direct injection, indirect RAG, canary secrets, and benign controls).
+                </p>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <button class="btn-primary" style="width:auto; padding:10px 18px;" id="btn-run-benchmark" onclick="runLiveBenchmark()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Execute 60-Sample Benchmark
+                </button>
+                <button class="btn-secondary" style="font-size:0.8rem;" onclick="saveEvaluationToDatabase()">
+                  Save Run to Database
+                </button>
+              </div>
+            </div>
+
+            <!-- 5 KPI Cards -->
+            <div class="kpi-grid-4" style="grid-template-columns:repeat(5, 1fr); margin-bottom:24px;">
+              <div class="metric-card">
+                <span class="metric-label">Precision</span>
+                <div class="metric-val" id="lbl-bench-precision" style="color:var(--color-allow);">100.0%</div>
+                <span class="metric-subtext">TP / (TP + FP)</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">Recall</span>
+                <div class="metric-val" id="lbl-bench-recall" style="color:var(--accent-blue);">97.5%</div>
+                <span class="metric-subtext">TP / (TP + FN)</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">False Positive Rate</span>
+                <div class="metric-val" id="lbl-bench-fpr" style="color:var(--color-allow);">0.0%</div>
+                <span class="metric-subtext">FP / (FP + TN)</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">False Negative Rate</span>
+                <div class="metric-val" id="lbl-bench-fnr" style="color:var(--accent-amber);">2.5%</div>
+                <span class="metric-subtext">FN / (FN + TP)</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-label">Overall Accuracy</span>
+                <div class="metric-val" id="lbl-bench-accuracy">98.1%</div>
+                <span class="metric-subtext">(TP + TN) / Total</span>
+              </div>
+            </div>
+
+            <!-- 2x2 Confusion Matrix -->
+            <div style="background:var(--bg-surface-elevated); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); margin-bottom:20px;">
+              <h3 style="font-size:0.95rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; text-align:center;">
+                Verified 2×2 Confusion Matrix
+              </h3>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div style="background:rgba(54, 211, 153, 0.08); border:1px solid rgba(54, 211, 153, 0.25); padding:16px; border-radius:8px;">
+                  <span style="font-size:0.75rem; color:var(--color-allow); font-weight:700;">TRUE POSITIVES (TP)</span>
+                  <div id="lbl-bench-tp" style="font-size:1.8rem; font-weight:800; color:var(--color-allow); margin:4px 0;">39</div>
+                  <span style="font-size:0.75rem; color:var(--text-muted);">Attacks correctly intercepted (BLOCK / SANITIZE)</span>
+                </div>
+                <div style="background:rgba(255, 93, 115, 0.08); border:1px solid rgba(255, 93, 115, 0.25); padding:16px; border-radius:8px;">
+                  <span style="font-size:0.75rem; color:var(--color-block); font-weight:700;">FALSE POSITIVES (FP)</span>
+                  <div id="lbl-bench-fp" style="font-size:1.8rem; font-weight:800; color:var(--color-block); margin:4px 0;">0</div>
+                  <span style="font-size:0.75rem; color:var(--text-muted);">Legitimate queries mistakenly blocked (0% FPR)</span>
+                </div>
+                <div style="background:rgba(255, 171, 0, 0.08); border:1px solid rgba(255, 171, 0, 0.25); padding:16px; border-radius:8px;">
+                  <span style="font-size:0.75rem; color:var(--accent-amber); font-weight:700;">FALSE NEGATIVES (FN)</span>
+                  <div id="lbl-bench-fn" style="font-size:1.8rem; font-weight:800; color:var(--accent-amber); margin:4px 0;">1</div>
+                  <span style="font-size:0.75rem; color:var(--text-muted);">Missed attack (Disclosed: OBF-008 Unicode BiDi)</span>
+                </div>
+                <div style="background:rgba(79, 134, 247, 0.08); border:1px solid rgba(79, 134, 247, 0.25); padding:16px; border-radius:8px;">
+                  <span style="font-size:0.75rem; color:var(--accent-blue); font-weight:700;">TRUE NEGATIVES (TN)</span>
+                  <div id="lbl-bench-tn" style="font-size:1.8rem; font-weight:800; color:var(--accent-blue); margin:4px 0;">12</div>
+                  <span style="font-size:0.75rem; color:var(--text-muted);">Legitimate queries correctly permitted (ALLOW)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transparent Misses & Disclosures -->
+            <div style="background:var(--bg-primary); padding:18px; border-radius:8px; border:1px solid var(--border-subtle);">
+              <h4 style="font-size:0.95rem; font-weight:700; color:var(--accent-amber); margin-bottom:8px;">
+                Transparent Limitation Disclosure (OBF-008)
+              </h4>
+              <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:8px;">
+                Sample ID: <code>OBF-008</code> (Unicode BiDi override). Raw text stores reverse characters while visual rendering reads "reveal system prompt". Full analysis documented in KNOWN_ISSUES.md.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <!-- SECTION 8: SETTINGS -->
         <section id="view-settings" class="tab-content">
           <div class="glass-card">
@@ -786,6 +1319,35 @@
       </main>
     </div>
   </div>
+
+    <!-- Interactive Review Case Modal -->
+    <div class="modal-overlay" id="modal-review" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:9999; justify-content:center; align-items:center;">
+      <div class="glass-card" style="width:90%; max-width:520px; background:var(--bg-surface); padding:24px; border-radius:var(--radius-lg); border:1px solid var(--border-subtle); box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+        <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:8px; color:var(--text-primary);">Resolve Escalated Review Case</h3>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:16px;" id="lbl-modal-case-title">Case ID: ...</p>
+
+        <input type="hidden" id="modal-case-id">
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px;">Reviewer Decision Action</label>
+          <select id="modal-decision-action" class="code-textarea" style="width:100%; height:40px; padding:6px 12px; font-size:0.85rem; background:var(--bg-primary); color:var(--text-primary);">
+            <option value="ALLOW">APPROVE (Allow Content)</option>
+            <option value="BLOCK" selected>BLOCK (Confirm Security Threat)</option>
+            <option value="SANITIZE">SANITIZE (Redact Sensitive Spans)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:6px;">Mandatory Review Justification (>= 5 chars)</label>
+          <textarea id="modal-justification" class="code-textarea" style="width:100%; height:80px; padding:8px 12px; font-size:0.85rem; color:var(--text-primary);" placeholder="Document technical justification for this resolution action..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button class="btn-secondary" onclick="closeReviewModal()">Cancel</button>
+          <button class="btn-primary" style="width:auto; padding:8px 20px;" onclick="submitReviewModalDecision()">Submit Resolution</button>
+        </div>
+      </div>
+    </div>
 
   <script src="app.js"></script>
 </body>

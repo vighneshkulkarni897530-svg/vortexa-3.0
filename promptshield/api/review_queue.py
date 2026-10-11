@@ -100,6 +100,7 @@ def assign_review_case(
 
 
 @router.post("/{case_id}/decision", response_model=ReviewCaseResponse)
+@router.post("/{case_id}/decide", response_model=ReviewCaseResponse, include_in_schema=False)
 def submit_review_decision(
     case_id: str,
     req: ReviewDecisionRequest,

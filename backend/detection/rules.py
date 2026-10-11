@@ -128,7 +128,7 @@ PROMPT_DISCLOSURE_PATTERNS = [
         base_severity=Severity.HIGH,
         base_confidence=0.91,
         regex=re.compile(
-            r"\b(?:repeat|print|reveal|output|echo|display|show\s+me)\s+(?:(?:in\s+markdown\s+(?:codeblock\s+)?)?\s*(?:everything\s+above|the\s+entire\s+(?:system\s+|initial\s+)?(?:prompt|message|instruction)s?|(?:the\s+|your\s+|initial\s+|system\s+|developer\s+|hidden\s+)*(?:prompt|instructions?|directives?|rules?)))\b",
+            r"\b(?:repeat|print|reveal|output|echo|display|show(?:\s+me)?)\s+(?:(?:in\s+markdown\s+(?:codeblock\s+)?)?\s*(?:everything\s+above|the\s+entire\s+(?:system\s+|initial\s+)?(?:prompt|message|instruction)s?|(?:the\s+|your\s+|initial\s+|system\s+|developer\s+|hidden\s+)*(?:prompt|instructions?|directives?|rules?)))\b",
             re.IGNORECASE,
         ),
         summary_template="Imperative command instructing the model to disclose protected system prompts",

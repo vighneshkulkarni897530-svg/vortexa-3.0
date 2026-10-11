@@ -63,3 +63,17 @@ def transaction_scope() -> Generator[Session, None, None]:
 def create_all_tables() -> None:
     """Helper to initialize tables when migrations are not executed directly."""
     Base.metadata.create_all(bind=engine)
+    try:
+        import os
+        from alembic.config import Config
+        from alembic import command
+        from alembic.migration import MigrationContext
+        if os.path.exists("alembic.ini"):
+            with engine.connect() as conn:
+                context = MigrationContext.configure(conn)
+                current_rev = context.get_current_revision()
+                if current_rev is None:
+                    alembic_cfg = Config("alembic.ini")
+                    command.stamp(alembic_cfg, "head")
+    except Exception:
+        pass

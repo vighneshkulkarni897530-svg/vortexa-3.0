@@ -131,6 +131,7 @@ class SecretScanner:
         text: str,
         source_ctx: SourceContext,
         auxiliary_channels: Optional[List[Tuple[str, str]]] = None,
+        extra_tokens: Optional[List[str]] = None,
     ) -> List[DetectionFinding]:
         """Scan text and auxiliary channels, returning findings with safe redacted evidence."""
         findings: List[DetectionFinding] = []
@@ -140,8 +141,12 @@ class SecretScanner:
         # Track matched spans to avoid duplicate reporting on overlapping rules
         reported_spans: Set[Tuple[int, int]] = set()
 
+        all_canaries = set(self.canary_tokens)
+        if extra_tokens:
+            all_canaries.update(t.strip() for t in extra_tokens if t and t.strip())
+
         # 1. Canary Token Flexible Scan (Catches spacing, capitalization, leetspeak, delimiters)
-        for canary in self.canary_tokens:
+        for canary in all_canaries:
             if not canary:
                 continue
             token_rgx = self._get_token_regex(canary)

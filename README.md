@@ -163,10 +163,12 @@ See [DEPLOYMENT.md](file:///d:/Vortexa%203.0/DEPLOYMENT.md) for full container t
 
 ## 7. Deliverables & Documentation Index
 
-- [INTEGRATION_CHECKLIST.md](file:///d:/Vortexa%203.0/INTEGRATION_CHECKLIST.md) — 10-step integration protocol and cross-laptop schema contracts.
-- [EVALUATION_REPORT.md](file:///d:/Vortexa%203.0/EVALUATION_REPORT.md) — Complete evaluation report with 4-action confusion matrix and honest metrics.
+- [ARCHITECTURE.md](file:///d:/Vortexa%203.0/ARCHITECTURE.md) — Complete multi-layer architecture specification with Mermaid system and ERD diagrams.
+- [DEMO_SCRIPT.md](file:///d:/Vortexa%203.0/DEMO_SCRIPT.md) — 5-minute live demonstration script for SIH judges covering all 8 core scenarios.
+- [EVALUATION_REPORT.md](file:///d:/Vortexa%203.0/EVALUATION_REPORT.md) — Verified benchmark evaluation report with 4-action confusion matrix and latency statistics.
+- [LIMITATIONS_AND_FUTURE_SCOPE.md](file:///d:/Vortexa%203.0/LIMITATIONS_AND_FUTURE_SCOPE.md) — Technical boundaries, defense-in-depth principles, and multi-phase roadmap.
+- [INTEGRATION_CHECKLIST.md](file:///d:/Vortexa%203.0/INTEGRATION_CHECKLIST.md) — 10-step integration protocol and cross-service schema contracts.
 - [DEPLOYMENT.md](file:///d:/Vortexa%203.0/DEPLOYMENT.md) — Docker Compose, standalone microservice setup, CORS, and TLS configurations.
-- [DEMO_SCRIPT.md](file:///d:/Vortexa%203.0/DEMO_SCRIPT.md) — 5-minute live demonstration script covering all 9 presentation flows.
-- [KNOWN_ISSUES.md](file:///d:/Vortexa%203.0/KNOWN_ISSUES.md) — Technical RCA of missed attack `OBF-008` (Unicode BiDi) and mitigation roadmap.
+- [KNOWN_ISSUES.md](file:///d:/Vortexa%203.0/KNOWN_ISSUES.md) — Technical RCA of edge cases and security resolution log.
 - [data/DATASET_DOCUMENTATION.md](file:///d:/Vortexa%203.0/data/DATASET_DOCUMENTATION.md) — Benchmark dataset schema, labeling criteria, and category counts.
 - [data/labelled_benchmark_dataset_v1.json](file:///d:/Vortexa%203.0/data/labelled_benchmark_dataset_v1.json) — 60 curated evaluation samples.

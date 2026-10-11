@@ -99,6 +99,14 @@ class ContentNormalizer:
 
         working_text = text[: self.max_length]
 
+        # 0. Directional override (BiDi) un-reversal
+        if "\u202e" in working_text:
+            def reverse_bidi(m):
+                return m.group(1)[::-1]
+            working_text = re.sub(r"\u202e([^\u202c]*?)(?:\u202c|$)", reverse_bidi, working_text)
+            transformations.append("bidi_override_reversed")
+            encodings.append("bidi_override")
+
         # 1. Zero-width character detection & stripping
         cleaned_chars = []
         stripped_zero_width = False

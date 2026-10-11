@@ -165,7 +165,15 @@ class PolicyClient:
                 policy_version=f"{self.fallback_policy_version}-local",
             )
 
-        # Policy Rule 5: Default ALLOW for verified safe/low content
+        # Policy Rule 5: High severity threats that cannot be sanitized, or recommended BLOCK -> BLOCK
+        if recommended_action == DecisionAction.BLOCK or (has_high and recommended_action != DecisionAction.SANITIZE):
+            return PolicyEvaluationResult(
+                final_decision=DecisionAction.BLOCK,
+                decision_reason="Policy rule POL-002: High-severity threat identified; request rejected.",
+                policy_version=f"{self.fallback_policy_version}-local",
+            )
+
+        # Policy Rule 6: Default ALLOW for verified safe/low content
         return PolicyEvaluationResult(
             final_decision=DecisionAction.ALLOW,
             decision_reason="Policy rule POL-005: Content verified safe; within acceptable operational risk bounds.",
